@@ -72,3 +72,10 @@ module FromDiagonal (T : ArithmetizedTheory) (DL : DiagonalLemma T) where
   GSentence = fromFixedPoint (gödelFixedPoint DL)
 
   open Theorem T GSentence public
+
+-- Direct theorem from the weaker fixed-point interface actually used here.
+module FromNoProofsFixedPoint (T : ArithmetizedTheory) (N : NoProofsFixedPoint T) where
+  GSentence : GödelSentence T
+  GSentence = fromNoProofsFixedPoint N
+
+  open Theorem T GSentence public

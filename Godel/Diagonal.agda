@@ -23,6 +23,19 @@ record DiagonalLemma (T : ArithmetizedTheory) : Set where
   field
     fixedPoint : (φ : Formula) → FixedPoint T φ
 
+-- The incompleteness proof only needs the fixed point of noProofsTemplate.
+-- This weaker interface lets later developments target the exact fixed point
+-- used by the theorem before proving the full diagonal lemma.
+record NoProofsFixedPoint (T : ArithmetizedTheory) : Set where
+  field
+    fixedPoint-noProofs : FixedPoint T noProofsTemplate
+
+noProofsFixedPoint-fromDiagonal :
+  {T : ArithmetizedTheory} → DiagonalLemma T → NoProofsFixedPoint T
+noProofsFixedPoint-fromDiagonal D = record
+  { fixedPoint-noProofs = DiagonalLemma.fixedPoint D noProofsTemplate
+  }
+
 -- A Gödel sentence G for T has the two formal consequences used in the proof.
 record GödelSentence (T : ArithmetizedTheory) : Set where
   open ArithmetizedTheory T
@@ -34,6 +47,10 @@ record GödelSentence (T : ArithmetizedTheory) : Set where
 -- The fixed point of noProofsTemplate is the usual Gödel sentence.
 gödelFixedPoint : {T : ArithmetizedTheory} → DiagonalLemma T → FixedPoint T noProofsTemplate
 gödelFixedPoint D = DiagonalLemma.fixedPoint D noProofsTemplate
+
+gödelFixedPoint-fromNoProofs :
+  {T : ArithmetizedTheory} → NoProofsFixedPoint T → FixedPoint T noProofsTemplate
+gödelFixedPoint-fromNoProofs N = NoProofsFixedPoint.fixedPoint-noProofs N
 
 -- Convert the fixed-point lemma plus a small classical-logic principle into
 -- the exact GödelSentence interface consumed by the theorem.
@@ -61,3 +78,7 @@ fromFixedPoint {T} fp = record
 
     notg→sp : Provable ((¬ᶠ θ) ⇒ someProof θ)
     notg→sp = mp classical-step np→g
+
+fromNoProofsFixedPoint :
+  {T : ArithmetizedTheory} → NoProofsFixedPoint T → GödelSentence T
+fromNoProofsFixedPoint N = fromFixedPoint (gödelFixedPoint-fromNoProofs N)

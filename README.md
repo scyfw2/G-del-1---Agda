@@ -23,6 +23,10 @@ Godel/Coding.agda
     ProofOf p A = “p 是公式 A 的证明码”。
   还包含 noProofs、someProof、noProofsTemplate 以及替换计算引理。
 
+Godel/CanonicalCoding.agda
+  可解码的结构化/数值化语法编码层、fuelled decode round-trip 引理、
+  diagFormula/DiagCode/DiagRel 基础。
+
 Godel/ProofSystem.agda
   参数化 Hilbert 风格证明系统 Derives Ax A。
 

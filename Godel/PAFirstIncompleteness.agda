@@ -49,11 +49,33 @@ record PAIncompletenessData : Set₁ where
     repr : PARepresentability
     diagonal-lemma-PA : DiagonalLemma (PA-as-theory repr)
 
+record PANoProofsIncompletenessData : Set₁ where
+  field
+    repr : PARepresentability
+    noProofs-fixedPoint-PA : NoProofsFixedPoint (PA-as-theory repr)
+
+PA-noProofs-data-from-diagonal :
+  PAIncompletenessData → PANoProofsIncompletenessData
+PA-noProofs-data-from-diagonal D = record
+  { repr = PAIncompletenessData.repr D
+  ; noProofs-fixedPoint-PA =
+      noProofsFixedPoint-fromDiagonal (PAIncompletenessData.diagonal-lemma-PA D)
+  }
+
 PA-GödelSentence : (D : PAIncompletenessData) → GödelSentence (PA-as-theory (PAIncompletenessData.repr D))
 PA-GödelSentence D = fromFixedPoint (gödelFixedPoint (PAIncompletenessData.diagonal-lemma-PA D))
 
 PA-GödelFormula : PAIncompletenessData → Formula
 PA-GödelFormula D = GödelSentence.G (PA-GödelSentence D)
+
+PA-noProofs-GödelSentence :
+  (D : PANoProofsIncompletenessData) →
+  GödelSentence (PA-as-theory (PANoProofsIncompletenessData.repr D))
+PA-noProofs-GödelSentence D =
+  fromNoProofsFixedPoint (PANoProofsIncompletenessData.noProofs-fixedPoint-PA D)
+
+PA-noProofs-GödelFormula : PANoProofsIncompletenessData → Formula
+PA-noProofs-GödelFormula D = GödelSentence.G (PA-noProofs-GödelSentence D)
 
 -- Gödel's first incompleteness theorem for PA in original ω-consistency form,
 -- conditional on the standard PA arithmetization and diagonalization data.
@@ -69,3 +91,16 @@ PA-first-incompleteness D cons omega =
     T = PA-as-theory (PAIncompletenessData.repr D)
 
     module M = Theorem T (PA-GödelSentence D)
+
+PA-first-incompleteness-from-noProofs-fixedPoint :
+  (D : PANoProofsIncompletenessData) →
+  Consistent (PA-as-theory (PANoProofsIncompletenessData.repr D)) →
+  OmegaConsistent (PA-as-theory (PANoProofsIncompletenessData.repr D)) →
+  Undecidable (PA-as-theory (PANoProofsIncompletenessData.repr D)) (PA-noProofs-GödelFormula D)
+PA-first-incompleteness-from-noProofs-fixedPoint D cons omega =
+  M.first-incompleteness cons omega
+  where
+    T : ArithmetizedTheory
+    T = PA-as-theory (PANoProofsIncompletenessData.repr D)
+
+    module M = Theorem T (PA-noProofs-GödelSentence D)

@@ -17,10 +17,13 @@ The following parts are concrete Agda definitions or proofs:
 - first-order arithmetic syntax, including terms, formulas, de Bruijn
   variables, renaming, substitution, and numerals;
 - Godel coding functions for terms and formulas;
+- a checked structural coding layer with decoders and round-trip lemmas;
 - an object-language proof predicate shape, `ProofOf p A`;
 - a Hilbert-style derivability relation;
 - a small PA axiom schema and a concrete coding of PA proof trees;
 - an abstract arithmetized-theory interface;
+- the split between a full `DiagonalLemma` and the weaker
+  `NoProofsFixedPoint` actually needed for the theorem;
 - the conversion from a fixed point of `noProofsTemplate` to a
   `GödelSentence`;
 - the original Godel incompleteness argument using consistency and
@@ -75,7 +78,35 @@ fully expanded PA formalization.
    The important point is that `ArithmetizedTheory` is not PA itself. It is the
    abstract interface consumed by the incompleteness proof.
 
-4. `Godel.Diagonal`
+4. `Godel.CanonicalCoding`
+
+   This module adds a structural canonical code type, a separate numeric
+   base-4 digit-stream encoding for those codes, fuelled decoders, and
+   round-trip lemmas such as:
+
+   ```agda
+   decodeFormula-roundTrip :
+     (fuel : ℕ) → (A : Formula) →
+     decodeFormula (suc fuel) (canonicalCodeFormula A) ≡ just A
+
+   decodeCode-roundTrip :
+     (c : Code) → decodeCode (suc (codeSize c)) (encodeCode c) ≡ just c
+
+   decodeNatFormulaWithFuel-roundTrip :
+     (A : Formula) →
+     decodeNatFormulaWithFuel
+       (suc (codeSize (canonicalCodeFormula A)))
+       (canonicalNatFormula A)
+       ≡ just A
+   ```
+
+   It also defines `diagFormula`, `diagCode`, `DiagCode`, and `DiagRel` as the
+   staging layer for future diagonal/substitution representability work. This
+   does not replace the numeric `codeFormula` used by the current theorem.
+   The fuelled round-trip statements are the checked core; the unfuelled
+   `decodeNatTerm` and `decodeNatFormula` wrappers are convenience entrypoints.
+
+5. `Godel.Diagonal`
 
    `FixedPoint T φ` packages a sentence `θ` together with proofs that `T`
    proves both directions of:
@@ -88,7 +119,16 @@ fully expanded PA formalization.
    `φ`. Applying it to `noProofsTemplate` gives the usual self-referential
    Godel sentence shape.
 
-5. `Godel.Original`
+   The weaker record `NoProofsFixedPoint T` keeps only the fixed point needed
+   by the incompleteness proof:
+
+   ```agda
+   fixedPoint-noProofs : FixedPoint T noProofsTemplate
+   ```
+
+   A full `DiagonalLemma T` can be adapted into this weaker interface.
+
+6. `Godel.Original`
 
    This is the main abstract theorem. Given an `ArithmetizedTheory T` and a
    `GödelSentence T`, it proves:
@@ -106,7 +146,7 @@ fully expanded PA formalization.
      some proof of `G` exists, but consistency gives a proof of non-proofhood
      for every numeral, contradicting omega-consistency.
 
-6. `Godel.PAFirstIncompleteness`
+7. `Godel.PAFirstIncompleteness`
 
    This module specializes the abstract theorem to PA, conditional on the two
    remaining PA-specific ingredients:
@@ -121,13 +161,17 @@ fully expanded PA formalization.
    Once those fields are supplied, `PA-first-incompleteness` follows by
    reusing the theorem from `Godel.Original`.
 
+   The lighter record `PANoProofsIncompletenessData` accepts only a
+   `NoProofsFixedPoint` instead of a full `DiagonalLemma`, and feeds the same
+   abstract theorem through `PA-first-incompleteness-from-noProofs-fixedPoint`.
+
 ## Main Proof Path
 
 The shortest path through the project is:
 
 ```text
 noProofsTemplate
-  -> DiagonalLemma.fixedPoint
+  -> DiagonalLemma.fixedPoint or NoProofsFixedPoint.fixedPoint-noProofs
   -> FixedPoint T noProofsTemplate
   -> fromFixedPoint
   -> GödelSentence T
@@ -167,6 +211,11 @@ the proof checker.
 point. Proving it inside PA requires formalizing enough syntax and substitution
 coding for PA to reason about the diagonal/substitution function.
 
+`NoProofsFixedPoint` is a deliberately weaker target: it asks only for the
+fixed point of `noProofsTemplate`. The canonical coding module is a first
+checked step toward this target, but it does not yet prove that PA represents
+the diagonal/substitution graph.
+
 Because these are record fields rather than postulates, the checked theorem is
 conditional and explicit: any future implementation must provide exactly these
 pieces before obtaining the PA-level theorem.
@@ -179,4 +228,5 @@ The whole project is checked through:
 agda -i . Godel/Everything.agda
 ```
 
-This guide does not change the Agda API or theorem statements.
+The newer no-proofs-specific entrypoints are additive; the full diagonal-lemma
+entrypoints remain available.
