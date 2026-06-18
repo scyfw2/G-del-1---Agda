@@ -277,6 +277,21 @@ fully expanded PA formalization.
    `NoProofsFixedPoint` instead of a full `DiagonalLemma`, and feeds the same
    abstract theorem through `PA-first-incompleteness-from-noProofs-fixedPoint`.
 
+13. `Godel.PARepresentabilityEntry`
+
+   This is the first PA-facing entry layer for the checked graph work.  It
+   defines proof obligations directly in terms of `PA-provable`:
+
+   ```agda
+   PACheckedGraphRepresentability : Set₁
+   ```
+
+   The adapter `pa-checked-graph-representability-as-prePA` turns those
+   PA-specific obligations into the generic `CheckedPrePARepresentabilityData`
+   interface for `PA-as-theory repr`.  The record
+   `PANoProofsFixedPointEntryData` marks the next boundary: PA checked graph
+   representability plus a noProofs fixed-point construction target.
+
 ## Main Proof Path
 
 The shortest path through the project is:
@@ -288,7 +303,9 @@ noProofsTemplate
   -> checked Subst0NatCode / DiagNatCode Boolean graph targets
   -> checked Represents₂ / Represents₃ interfaces
   -> noProofsFixedPointCandidate
-  -> PA instances of checked graph representability
+  -> PA-facing PACheckedGraphRepresentability obligations
+  -> adapter to CheckedPrePARepresentabilityData for PA
+  -> PA noProofs fixed-point construction target
   -> DiagonalLemma.fixedPoint or NoProofsFixedPoint.fixedPoint-noProofs
   -> FixedPoint T noProofsTemplate
   -> fromFixedPoint
@@ -335,9 +352,12 @@ make the next representability targets explicit, but they do not yet prove that
 PA represents the diagonal/substitution graph. The checked graph layer narrows
 the target further: PA should represent the Boolean checkers
 `subst0NatCode?` and `diagNatCode?`, packaged as
-`CheckedPrePARepresentabilityData`. After that, the next large task is to
-connect those checked graph facts to a noProofs fixed point and eventually to
-the proof predicate fields in `PARepresentability`.
+`CheckedPrePARepresentabilityData`.  `Godel.PARepresentabilityEntry` moves this
+from a generic theory target to explicit `PA-provable` obligations via
+`PACheckedGraphRepresentability`.  It still does not prove those obligations;
+the next large task is to build PA proofs of the checked graph predicates,
+connect those facts to a noProofs fixed point, and eventually discharge the
+proof predicate fields in `PARepresentability`.
 
 Because these are record fields rather than postulates, the checked theorem is
 conditional and explicit: any future implementation must provide exactly these

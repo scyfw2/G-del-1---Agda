@@ -19,5 +19,6 @@ import Godel.Diagonal
 import Godel.Original
 import Godel.Rosser
 import Godel.PAFirstIncompleteness
+import Godel.PARepresentabilityEntry
 import Godel.AbstractOriginal
 import Godel.AbstractRosser

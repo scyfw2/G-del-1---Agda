@@ -70,6 +70,10 @@ Godel/Rosser.agda
 Godel/PAFirstIncompleteness.agda
   将 PA 语法、PA 证明编码、表示性假设、对角化假设组合起来，得到 PA 版本的第一不完备性定理。
 
+Godel/PARepresentabilityEntry.agda
+  PA 入门层：直接以 PA-provable 表达 checked graph 表示性义务，
+  并提供到 CheckedPrePARepresentabilityData 的 adapter。
+
 Godel/AbstractOriginal.agda, Godel/AbstractRosser.agda
   旧版更小的抽象证明骨架，也保留下来。
 ```
