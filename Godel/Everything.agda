@@ -6,7 +6,9 @@ import Godel.Core
 import Godel.Syntax
 import Godel.Coding
 import Godel.CanonicalCoding
+import Godel.DecidableCoding
 import Godel.DiagonalCoding
+import Godel.ComputableGraphs
 import Godel.RepresentabilityTargets
 import Godel.NoProofsDiagonalization
 import Godel.ProofSystem

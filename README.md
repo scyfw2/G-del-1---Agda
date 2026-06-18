@@ -25,15 +25,22 @@ Godel/Coding.agda
 
 Godel/CanonicalCoding.agda
   可解码的结构化/数值化语法编码层、fuelled decode round-trip 引理、
-  diagFormula/DiagCode/DiagRel 基础。
+  unfuelled decode round-trip/no-junk 引理、diagFormula/DiagCode/DiagRel 基础。
+
+Godel/DecidableCoding.agda
+  自然数、项、项列表、公式的布尔相等检查器、反身性和 soundness 证明。
 
 Godel/DiagonalCoding.agda
   canonical 数值编码上的 Subst0NatCode/DiagNatCode 图关系，
   以及未来对象语言表示性目标 Subst0Rel。
 
+Godel/ComputableGraphs.agda
+  使用 canonical decoder 和布尔相等定义 checked substitution/diagonal graph，
+  并证明 checked graph soundness 以及到 Σ graph 的桥接。
+
 Godel/RepresentabilityTargets.agda
-  Subst0Rel/DiagRel 表示 Subst0NatCode/DiagNatCode 的通用接口，
-  以及 PrePARepresentabilityData 聚合边界。
+  Subst0Rel/DiagRel 表示 graph 目标的通用接口，
+  以及 checked/un-checked 的 PrePARepresentabilityData 聚合边界。
 
 Godel/NoProofsDiagonalization.agda
   noProofs 专用 diagonal helper formula、candidate 公式，

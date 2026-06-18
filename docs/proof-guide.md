@@ -98,15 +98,36 @@ fully expanded PA formalization.
        (suc (codeSize (canonicalCodeFormula A)))
        (canonicalNatFormula A)
        ≡ just A
+
+   decodeNatFormula-roundTrip :
+     (A : Formula) →
+     decodeNatFormula (canonicalNatFormula A) ≡ just A
    ```
 
    It also defines `diagFormula`, `diagCode`, `DiagCode`, and `DiagRel` as early
    staging pieces for future diagonal/substitution representability work. This
    does not replace the numeric `codeFormula` used by the current theorem. The
    fuelled round-trip statements are the checked core; the unfuelled
-   `decodeNatTerm` and `decodeNatFormula` wrappers are convenience entrypoints.
+   `decodeNatTerm` and `decodeNatFormula` wrappers now also have canonical
+   round-trip proofs.
 
-5. `Godel.DiagonalCoding`
+5. `Godel.DecidableCoding`
+
+   This module defines small Boolean equality checkers for natural numbers,
+   terms, term lists, and formulas:
+
+   ```agda
+   termEq : Term → Term → Bool
+   formulaEq : Formula → Formula → Bool
+   ```
+
+   The key facts are reflexivity lemmas such as `termEq-refl` and
+   `formulaEq-refl`, plus soundness lemmas such as `termEq-sound` and
+   `formulaEq-sound`.  Reflexivity gives checked graph completeness; soundness
+   lets a successful checker run recover propositional equality of decoded
+   syntax.
+
+6. `Godel.DiagonalCoding`
 
    This module turns the canonical numeric coding into explicit meta-level graph
    predicates:
@@ -137,7 +158,23 @@ fully expanded PA formalization.
    future representability theorem. This still does not prove that PA represents
    substitution or diagonalization.
 
-6. `Godel.RepresentabilityTargets`
+7. `Godel.ComputableGraphs`
+
+   This module turns the graph specifications into Boolean checkers:
+
+   ```agda
+   subst0NatCode? : ℕ → ℕ → ℕ → Bool
+   diagNatCode?   : ℕ → ℕ → Bool
+   ```
+
+   Their Set wrappers, `CheckedSubst0NatCode` and `CheckedDiagNatCode`, are the
+   more concrete targets for a future PA representability proof.  The module
+   proves that genuine syntax operations are accepted by these checkers, that
+   successful checker runs decode to the intended syntax operation, and that
+   checked graph facts imply the older Σ-style `Subst0NatCode` / `DiagNatCode`
+   specifications.
+
+8. `Godel.RepresentabilityTargets`
 
    This module packages the next target as records rather than PA proofs:
 
@@ -147,13 +184,17 @@ fully expanded PA formalization.
 
    DiagRepresentability T
    Subst0Representability T
+   CheckedDiagRepresentability T
+   CheckedSubst0Representability T
    ```
 
    The aggregate `PrePARepresentabilityData T` means that the substitution and
    diagonal graph representability targets have both been supplied for a theory
-   `T`. It is the intended boundary before starting a real PA instance.
+   `T`.  The checked aggregate `CheckedPrePARepresentabilityData T` is the
+   recommended next PA-facing target because it is tied to executable Boolean
+   graph checkers.
 
-7. `Godel.NoProofsDiagonalization`
+9. `Godel.NoProofsDiagonalization`
 
    This module names the noProofs-specific diagonal helper:
 
@@ -177,7 +218,7 @@ fully expanded PA formalization.
    PA-facing stage, because expanding its old unary numeral code would be much
    too large for routine type checking.
 
-8. `Godel.Diagonal`
+10. `Godel.Diagonal`
 
    `FixedPoint T φ` packages a sentence `θ` together with proofs that `T`
    proves both directions of:
@@ -199,7 +240,7 @@ fully expanded PA formalization.
 
    A full `DiagonalLemma T` can be adapted into this weaker interface.
 
-9. `Godel.Original`
+11. `Godel.Original`
 
    This is the main abstract theorem. Given an `ArithmetizedTheory T` and a
    `GödelSentence T`, it proves:
@@ -217,7 +258,7 @@ fully expanded PA formalization.
      some proof of `G` exists, but consistency gives a proof of non-proofhood
      for every numeral, contradicting omega-consistency.
 
-10. `Godel.PAFirstIncompleteness`
+12. `Godel.PAFirstIncompleteness`
 
    This module specializes the abstract theorem to PA, conditional on the two
    remaining PA-specific ingredients:
@@ -243,9 +284,11 @@ The shortest path through the project is:
 ```text
 noProofsTemplate
   -> canonical numeric coding
-  -> Subst0NatCode / DiagNatCode as future representability targets
-  -> Represents₂ / Represents₃ interfaces
+  -> decode round-trip
+  -> checked Subst0NatCode / DiagNatCode Boolean graph targets
+  -> checked Represents₂ / Represents₃ interfaces
   -> noProofsFixedPointCandidate
+  -> PA instances of checked graph representability
   -> DiagonalLemma.fixedPoint or NoProofsFixedPoint.fixedPoint-noProofs
   -> FixedPoint T noProofsTemplate
   -> fromFixedPoint
@@ -289,10 +332,12 @@ coding for PA to reason about the diagonal/substitution function.
 `NoProofsFixedPoint` is a deliberately weaker target: it asks only for the
 fixed point of `noProofsTemplate`. The canonical and diagonal coding modules
 make the next representability targets explicit, but they do not yet prove that
-PA represents the diagonal/substitution graph. `PrePARepresentabilityData`
-marks the pre-PA boundary: after it, the next large task is to provide a PA
-instance of these representability targets, and eventually the proof predicate
-fields in `PARepresentability`.
+PA represents the diagonal/substitution graph. The checked graph layer narrows
+the target further: PA should represent the Boolean checkers
+`subst0NatCode?` and `diagNatCode?`, packaged as
+`CheckedPrePARepresentabilityData`. After that, the next large task is to
+connect those checked graph facts to a noProofs fixed point and eventually to
+the proof predicate fields in `PARepresentability`.
 
 Because these are record fields rather than postulates, the checked theorem is
 conditional and explicit: any future implementation must provide exactly these

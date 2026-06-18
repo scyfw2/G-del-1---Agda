@@ -8,6 +8,7 @@ open import Godel.Syntax
 open import Godel.ArithmetizedTheory
 open import Godel.CanonicalCoding
 open import Godel.DiagonalCoding
+open import Godel.ComputableGraphs
 
 -- Generic representability targets for concrete numeric relations.
 -- These records state the object-language formulas that should represent
@@ -44,7 +45,19 @@ DiagRepresentability T = Represents₂ T DiagNatCode DiagRel
 Subst0Representability : ArithmetizedTheory → Set₁
 Subst0Representability T = Represents₃ T Subst0NatCode Subst0Rel
 
+CheckedDiagRepresentability : ArithmetizedTheory → Set₁
+CheckedDiagRepresentability T = Represents₂ T CheckedDiagNatCode DiagRel
+
+CheckedSubst0Representability : ArithmetizedTheory → Set₁
+CheckedSubst0Representability T =
+  Represents₃ T CheckedSubst0NatCode Subst0Rel
+
 record PrePARepresentabilityData (T : ArithmetizedTheory) : Set₁ where
   field
     subst0-representability : Subst0Representability T
     diag-representability   : DiagRepresentability T
+
+record CheckedPrePARepresentabilityData (T : ArithmetizedTheory) : Set₁ where
+  field
+    checked-subst0-representability : CheckedSubst0Representability T
+    checked-diag-representability   : CheckedDiagRepresentability T
