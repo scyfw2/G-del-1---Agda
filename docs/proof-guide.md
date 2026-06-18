@@ -137,7 +137,47 @@ fully expanded PA formalization.
    future representability theorem. This still does not prove that PA represents
    substitution or diagonalization.
 
-6. `Godel.Diagonal`
+6. `Godel.RepresentabilityTargets`
+
+   This module packages the next target as records rather than PA proofs:
+
+   ```agda
+   Represents₂ T R F
+   Represents₃ T R F
+
+   DiagRepresentability T
+   Subst0Representability T
+   ```
+
+   The aggregate `PrePARepresentabilityData T` means that the substitution and
+   diagonal graph representability targets have both been supplied for a theory
+   `T`. It is the intended boundary before starting a real PA instance.
+
+7. `Godel.NoProofsDiagonalization`
+
+   This module names the noProofs-specific diagonal helper:
+
+   ```text
+   ψ(x) := noProofsTemplate(x) := ∀p. ¬ Proof(p,x)
+   ```
+
+   Its candidate sentence is `diagFormula ψ`.  The module proves this candidate
+   lands in the canonical diagonal graph:
+
+   ```agda
+   noProofsCandidate-diagNatCode :
+     DiagNatCode
+       (canonicalNatFormula noProofsDiagonalTemplate)
+       (canonicalNatFormula noProofsFixedPointCandidate)
+   ```
+
+   This is still a candidate-level scaffold; proving it is a real fixed point
+   requires object-language use of `DiagRepresentability`.  A richer helper
+   formula that mentions `DiagRel` directly is intentionally left to that later
+   PA-facing stage, because expanding its old unary numeral code would be much
+   too large for routine type checking.
+
+8. `Godel.Diagonal`
 
    `FixedPoint T φ` packages a sentence `θ` together with proofs that `T`
    proves both directions of:
@@ -159,7 +199,7 @@ fully expanded PA formalization.
 
    A full `DiagonalLemma T` can be adapted into this weaker interface.
 
-7. `Godel.Original`
+9. `Godel.Original`
 
    This is the main abstract theorem. Given an `ArithmetizedTheory T` and a
    `GödelSentence T`, it proves:
@@ -177,7 +217,7 @@ fully expanded PA formalization.
      some proof of `G` exists, but consistency gives a proof of non-proofhood
      for every numeral, contradicting omega-consistency.
 
-8. `Godel.PAFirstIncompleteness`
+10. `Godel.PAFirstIncompleteness`
 
    This module specializes the abstract theorem to PA, conditional on the two
    remaining PA-specific ingredients:
@@ -204,6 +244,8 @@ The shortest path through the project is:
 noProofsTemplate
   -> canonical numeric coding
   -> Subst0NatCode / DiagNatCode as future representability targets
+  -> Represents₂ / Represents₃ interfaces
+  -> noProofsFixedPointCandidate
   -> DiagonalLemma.fixedPoint or NoProofsFixedPoint.fixedPoint-noProofs
   -> FixedPoint T noProofsTemplate
   -> fromFixedPoint
@@ -247,7 +289,10 @@ coding for PA to reason about the diagonal/substitution function.
 `NoProofsFixedPoint` is a deliberately weaker target: it asks only for the
 fixed point of `noProofsTemplate`. The canonical and diagonal coding modules
 make the next representability targets explicit, but they do not yet prove that
-PA represents the diagonal/substitution graph.
+PA represents the diagonal/substitution graph. `PrePARepresentabilityData`
+marks the pre-PA boundary: after it, the next large task is to provide a PA
+instance of these representability targets, and eventually the proof predicate
+fields in `PARepresentability`.
 
 Because these are record fields rather than postulates, the checked theorem is
 conditional and explicit: any future implementation must provide exactly these

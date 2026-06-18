@@ -31,6 +31,14 @@ Godel/DiagonalCoding.agda
   canonical 数值编码上的 Subst0NatCode/DiagNatCode 图关系，
   以及未来对象语言表示性目标 Subst0Rel。
 
+Godel/RepresentabilityTargets.agda
+  Subst0Rel/DiagRel 表示 Subst0NatCode/DiagNatCode 的通用接口，
+  以及 PrePARepresentabilityData 聚合边界。
+
+Godel/NoProofsDiagonalization.agda
+  noProofs 专用 diagonal helper formula、candidate 公式，
+  以及 candidate 落在 DiagNatCode 图中的证明。
+
 Godel/ProofSystem.agda
   参数化 Hilbert 风格证明系统 Derives Ax A。
 

@@ -345,8 +345,9 @@ decodeNatFormulaWithFuel-roundTrip A
   rewrite decodeCode-roundTrip (canonicalCodeFormula A)
         | decodeFormula-roundTrip (codeSize (canonicalCodeFormula A)) A = refl
 
-diagFormula : Formula → Formula
-diagFormula A = subst0 (⌜ A ⌝ᶠ) A
+abstract
+  diagFormula : Formula → Formula
+  diagFormula A = subst0 (⌜ A ⌝ᶠ) A
 
 diagCode : Formula → ℕ
 diagCode A = codeFormula (diagFormula A)

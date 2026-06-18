@@ -7,6 +7,8 @@ import Godel.Syntax
 import Godel.Coding
 import Godel.CanonicalCoding
 import Godel.DiagonalCoding
+import Godel.RepresentabilityTargets
+import Godel.NoProofsDiagonalization
 import Godel.ProofSystem
 import Godel.PA
 import Godel.ProofCoding
