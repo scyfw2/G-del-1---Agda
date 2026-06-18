@@ -100,13 +100,44 @@ fully expanded PA formalization.
        ≡ just A
    ```
 
-   It also defines `diagFormula`, `diagCode`, `DiagCode`, and `DiagRel` as the
-   staging layer for future diagonal/substitution representability work. This
-   does not replace the numeric `codeFormula` used by the current theorem.
-   The fuelled round-trip statements are the checked core; the unfuelled
+   It also defines `diagFormula`, `diagCode`, `DiagCode`, and `DiagRel` as early
+   staging pieces for future diagonal/substitution representability work. This
+   does not replace the numeric `codeFormula` used by the current theorem. The
+   fuelled round-trip statements are the checked core; the unfuelled
    `decodeNatTerm` and `decodeNatFormula` wrappers are convenience entrypoints.
 
-5. `Godel.Diagonal`
+5. `Godel.DiagonalCoding`
+
+   This module turns the canonical numeric coding into explicit meta-level graph
+   predicates:
+
+   ```agda
+   Subst0NatCode : ℕ → ℕ → ℕ → Set
+   DiagNatCode   : ℕ → ℕ → Set
+   ```
+
+   It proves that the real syntax operations land in these graphs:
+
+   ```agda
+   subst0NatCode-complete :
+     (A : Formula) → (t : Term) →
+     Subst0NatCode
+       (canonicalNatFormula A)
+       (canonicalNatTerm t)
+       (canonicalNatFormula (subst0 t A))
+
+   diagNatCode-complete :
+     (A : Formula) →
+     DiagNatCode
+       (canonicalNatFormula A)
+       (canonicalNatFormula (diagFormula A))
+   ```
+
+   It also introduces `Subst0Rel` as an object-language relation wrapper for a
+   future representability theorem. This still does not prove that PA represents
+   substitution or diagonalization.
+
+6. `Godel.Diagonal`
 
    `FixedPoint T φ` packages a sentence `θ` together with proofs that `T`
    proves both directions of:
@@ -128,7 +159,7 @@ fully expanded PA formalization.
 
    A full `DiagonalLemma T` can be adapted into this weaker interface.
 
-6. `Godel.Original`
+7. `Godel.Original`
 
    This is the main abstract theorem. Given an `ArithmetizedTheory T` and a
    `GödelSentence T`, it proves:
@@ -146,7 +177,7 @@ fully expanded PA formalization.
      some proof of `G` exists, but consistency gives a proof of non-proofhood
      for every numeral, contradicting omega-consistency.
 
-7. `Godel.PAFirstIncompleteness`
+8. `Godel.PAFirstIncompleteness`
 
    This module specializes the abstract theorem to PA, conditional on the two
    remaining PA-specific ingredients:
@@ -171,6 +202,8 @@ The shortest path through the project is:
 
 ```text
 noProofsTemplate
+  -> canonical numeric coding
+  -> Subst0NatCode / DiagNatCode as future representability targets
   -> DiagonalLemma.fixedPoint or NoProofsFixedPoint.fixedPoint-noProofs
   -> FixedPoint T noProofsTemplate
   -> fromFixedPoint
@@ -212,9 +245,9 @@ point. Proving it inside PA requires formalizing enough syntax and substitution
 coding for PA to reason about the diagonal/substitution function.
 
 `NoProofsFixedPoint` is a deliberately weaker target: it asks only for the
-fixed point of `noProofsTemplate`. The canonical coding module is a first
-checked step toward this target, but it does not yet prove that PA represents
-the diagonal/substitution graph.
+fixed point of `noProofsTemplate`. The canonical and diagonal coding modules
+make the next representability targets explicit, but they do not yet prove that
+PA represents the diagonal/substitution graph.
 
 Because these are record fields rather than postulates, the checked theorem is
 conditional and explicit: any future implementation must provide exactly these

@@ -6,6 +6,7 @@ import Godel.Core
 import Godel.Syntax
 import Godel.Coding
 import Godel.CanonicalCoding
+import Godel.DiagonalCoding
 import Godel.ProofSystem
 import Godel.PA
 import Godel.ProofCoding

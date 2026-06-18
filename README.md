@@ -27,6 +27,10 @@ Godel/CanonicalCoding.agda
   可解码的结构化/数值化语法编码层、fuelled decode round-trip 引理、
   diagFormula/DiagCode/DiagRel 基础。
 
+Godel/DiagonalCoding.agda
+  canonical 数值编码上的 Subst0NatCode/DiagNatCode 图关系，
+  以及未来对象语言表示性目标 Subst0Rel。
+
 Godel/ProofSystem.agda
   参数化 Hilbert 风格证明系统 Derives Ax A。
 
