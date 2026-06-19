@@ -6,6 +6,7 @@ open import Agda.Builtin.Nat renaming (Nat to ℕ)
 open import Godel.Core
 open import Godel.Syntax
 open import Godel.PA
+open import Godel.PAClosedArithmetic
 open import Godel.CanonicalCoding
 open import Godel.ComputableGraphs
 open import Godel.DiagonalCoding
@@ -62,6 +63,7 @@ pa-checked-graph-representability-as-prePA repr graphs = record
 record PANoProofsFixedPointEntryData : Set₁ where
   field
     repr : PARepresentability
+    proof-infrastructure : PAProofInfrastructure
     checked-graphs-PA : PACheckedGraphRepresentability
     noProofs-fixedPoint-from-PA-graphs :
       NoProofsFixedPoint (PA-as-theory repr)

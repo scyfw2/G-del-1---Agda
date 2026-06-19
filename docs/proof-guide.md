@@ -277,7 +277,50 @@ fully expanded PA formalization.
    `NoProofsFixedPoint` instead of a full `DiagonalLemma`, and feeds the same
    abstract theorem through `PA-first-incompleteness-from-noProofs-fixedPoint`.
 
-13. `Godel.PARepresentabilityEntry`
+13. `Godel.PAObjectLogic`, `Godel.PAObjectLogicProofs`,
+    `Godel.PAClosedArithmetic`, and `Godel.PAClosedArithmeticProofs`
+
+   These modules name the PA-internal proof infrastructure needed before a real
+   checked graph representability instance can be attempted.  `PAObjectLogic`
+   packages equality reasoning and function congruence obligations such as
+   reflexivity, symmetry, transitivity, successor congruence, addition
+   congruence, and multiplication congruence.
+
+   `Godel.ProofSystem` now includes equality-logic proof rules for those
+   obligations, and `Godel.PAObjectLogicProofs` packages them as:
+
+   ```agda
+   paObjectLogic : PAObjectLogic
+   ```
+
+   `PAClosedArithmetic` packages closed numeral computations:
+
+   ```agda
+   pa-add-computes :
+     (m n : ℕ) →
+     PA-provable ((numeral m +ᵗ numeral n) ≈ numeral (m + n))
+
+   pa-mul-computes :
+     (m n : ℕ) →
+     PA-provable ((numeral m *ᵗ numeral n) ≈ numeral (m * n))
+   ```
+
+   `Godel.PAClosedArithmeticProofs` uses the PA axioms together with a supplied
+   `PAObjectLogic` record to build closed arithmetic, and
+   `Godel.PAObjectLogicProofs` instantiates this path:
+
+   ```agda
+   paClosedArithmetic-fromObjectLogic :
+     PAObjectLogic → PAClosedArithmetic
+
+   paProofInfrastructure :
+     PAProofInfrastructure
+   ```
+
+   So the PA object-logic layer is no longer just an interface; it has a
+   concrete proof-system implementation.
+
+14. `Godel.PARepresentabilityEntry`
 
    This is the first PA-facing entry layer for the checked graph work.  It
    defines proof obligations directly in terms of `PA-provable`:
@@ -289,8 +332,63 @@ fully expanded PA formalization.
    The adapter `pa-checked-graph-representability-as-prePA` turns those
    PA-specific obligations into the generic `CheckedPrePARepresentabilityData`
    interface for `PA-as-theory repr`.  The record
-   `PANoProofsFixedPointEntryData` marks the next boundary: PA checked graph
-   representability plus a noProofs fixed-point construction target.
+   `PANoProofsFixedPointEntryData` marks the next boundary: PA proof
+   infrastructure, PA checked graph representability, and a noProofs fixed-point
+   construction target.
+
+15. `Godel.PACheckedGraphTargets`
+
+   This module decomposes the PA checked graph obligation into smaller
+   representability targets.  Instead of treating
+   `PACheckedGraphRepresentability` as a black box, it introduces PA-facing
+   helper relations for decoder graphs and formula equality:
+
+   ```agda
+   PADecodeRepresentability
+   PAFormulaEqRepresentability
+   PASubst0RepresentabilityTarget
+   PADiagRepresentabilityTarget
+   ```
+
+   The aggregate `PACheckedGraphProofData` collects those targets together
+   with `PAProofInfrastructure`.  The adapter
+   `checkedGraphProofData-to-PARepresentability` shows that these smaller
+   obligations are sufficient to assemble the original
+   `PACheckedGraphRepresentability` interface.  The module still does not prove
+   that PA satisfies any of the targets; it makes the next PA proof obligations
+   explicit.
+
+16. `Godel.PrimitiveRecursive`, `Godel.PRRepresentability`,
+    `Godel.SyntaxCodingPR`, `Godel.PACheckedGraphPRTargets`, and
+    `Godel.PACheckedGraphPRProofs`
+
+   These modules start the non-staging primitive-recursive route.  The project
+   now has arity-indexed primitive recursive functions and relations:
+
+   ```agda
+   PRF   : ℕ → Set
+   PRRel : ℕ → Set
+   ```
+
+   and an evaluator `evalPRF`.  `Godel.PRRepresentability` defines what it
+   means for PA to represent a PR function or relation and proves the basic
+   zero, successor, and projection function cases.  The composition and
+   primitive-recursion closure steps are explicitly separated as remaining
+   targets, because proving them requires PA-coded existential witnesses,
+   sequence coding, and bounded reasoning.
+
+   `Godel.PACheckedGraphPRTargets` gives the final checked graph target shape
+   for this route.  Instead of using bare uninterpreted `Rel` symbols, it is
+   parameterized by concrete formula builders such as `DecodeTermFormula`,
+   `FormulaEqFormula`, `Subst0Formula`, and `DiagFormula`.  The intended source
+   of those formulas is the full PR representability theorem.
+
+   `Godel.SyntaxCodingPR` states the precise bridge still needed between the
+   executable Agda checkers and primitive-recursive relations.  It asks for PR
+   relations that are sound and complete for decoding, formula equality,
+   substitution, and diagonalization.  `Godel.PACheckedGraphPRProofs` then
+   shows that such PR relations, together with PA representations of those
+   relations, are enough to assemble `PACheckedGraphPRRepresentability`.
 
 ## Main Proof Path
 
@@ -304,7 +402,14 @@ noProofsTemplate
   -> checked Represents₂ / Represents₃ interfaces
   -> noProofsFixedPointCandidate
   -> PA-facing PACheckedGraphRepresentability obligations
-  -> adapter to CheckedPrePARepresentabilityData for PA
+  -> PA object logic / equality reasoning from proof-system rules
+  -> PA closed numeral arithmetic from PA axioms
+  -> decomposition into decode / formulaEq / subst0 / diag PA targets
+  -> SyntaxCodingPR bridge: checked graph relations are PR
+  -> PA representations of those PR relations
+  -> primitive-recursive formulas for decode / formulaEq / subst0 / diag
+  -> PR checked graph representability target
+  -> future bridge to CheckedPrePARepresentabilityData for PA
   -> PA noProofs fixed-point construction target
   -> DiagonalLemma.fixedPoint or NoProofsFixedPoint.fixedPoint-noProofs
   -> FixedPoint T noProofsTemplate
@@ -354,10 +459,22 @@ the target further: PA should represent the Boolean checkers
 `subst0NatCode?` and `diagNatCode?`, packaged as
 `CheckedPrePARepresentabilityData`.  `Godel.PARepresentabilityEntry` moves this
 from a generic theory target to explicit `PA-provable` obligations via
-`PACheckedGraphRepresentability`.  It still does not prove those obligations;
-the next large task is to build PA proofs of the checked graph predicates,
-connect those facts to a noProofs fixed point, and eventually discharge the
-proof predicate fields in `PARepresentability`.
+`PACheckedGraphRepresentability`.  `PAObjectLogic` names the PA-internal
+equality reasoning needed to start such proofs, and `PAObjectLogicProofs`
+constructs it from equality rules in the proof system.  Given that object
+logic, `PAClosedArithmeticProofs` derives closed numeral arithmetic from the PA
+axioms.
+
+The project does not use staging graph axiom schemas as a substitute for
+representability.  The older `DiagRel` / `Subst0Rel` wrappers remain useful as
+scaffolding, but the non-staging route is now separated in
+`PACheckedGraphPRTargets`: final PA graph proofs should be built from concrete
+arithmetical formulas generated by PR representability, not from uninterpreted
+relation symbols.  The remaining large tasks are to prove the PR
+representability closure steps, show the syntax coding algorithms are PR, use
+those facts to instantiate the PR checked graph targets, connect the result to
+a noProofs fixed point, and eventually discharge the proof predicate fields in
+`PARepresentability`.
 
 Because these are record fields rather than postulates, the checked theorem is
 conditional and explicit: any future implementation must provide exactly these

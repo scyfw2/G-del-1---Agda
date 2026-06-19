@@ -50,6 +50,18 @@ codeDerivation axCode (forall-eliminate {A} t) =
   tag six (pair (codeFormula A) (codeTerm t))
 codeDerivation axCode (exists-introduce {A} t) =
   tag seven (pair (codeFormula A) (codeTerm t))
+codeDerivation axCode (eq-refl-rule t) =
+  tag eight (codeTerm t)
+codeDerivation axCode (eq-sym-rule {s} {t}) =
+  tag nine (pair (codeTerm s) (codeTerm t))
+codeDerivation axCode (eq-trans-rule {r} {s} {t}) =
+  tag ten (pair (codeTerm r) (pair (codeTerm s) (codeTerm t)))
+codeDerivation axCode (suc-cong-rule {s} {t}) =
+  tag eleven (pair (codeTerm s) (codeTerm t))
+codeDerivation axCode (add-cong-rule {a} {b} {c} {d}) =
+  tag twelve (pair (codeTerm a) (pair (codeTerm b) (pair (codeTerm c) (codeTerm d))))
+codeDerivation axCode (mul-cong-rule {a} {b} {c} {d}) =
+  tag thirteen (pair (codeTerm a) (pair (codeTerm b) (pair (codeTerm c) (codeTerm d))))
 
 codePAProof : {A : Formula} → PA-provable A → ℕ
 codePAProof = codeDerivation codePAAxiom

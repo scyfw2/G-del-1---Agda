@@ -31,6 +31,24 @@ data Derives (Ax : Formula → Set) : Formula → Set where
   exists-introduce    : {A : Formula} → (t : Term) →
                         Derives Ax (subst0 t A ⇒ ∃ᶠ A)
 
+  eq-refl-rule        : (t : Term) →
+                        Derives Ax (t ≈ t)
+
+  eq-sym-rule         : {s t : Term} →
+                        Derives Ax (s ≈ t ⇒ t ≈ s)
+
+  eq-trans-rule       : {r s t : Term} →
+                        Derives Ax (r ≈ s ⇒ (s ≈ t ⇒ r ≈ t))
+
+  suc-cong-rule       : {s t : Term} →
+                        Derives Ax (s ≈ t ⇒ sucᵗ s ≈ sucᵗ t)
+
+  add-cong-rule       : {a b c d : Term} →
+                        Derives Ax (a ≈ b ⇒ (c ≈ d ⇒ (a +ᵗ c) ≈ (b +ᵗ d)))
+
+  mul-cong-rule       : {a b c d : Term} →
+                        Derives Ax (a ≈ b ⇒ (c ≈ d ⇒ (a *ᵗ c) ≈ (b *ᵗ d)))
+
 -- The object theory proves A if A is derivable from its axiom predicate.
 ProvableFrom : (Formula → Set) → Formula → Set
 ProvableFrom Ax A = Derives Ax A
