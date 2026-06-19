@@ -40,14 +40,63 @@ Godel/ComputableGraphs.agda
 
 Godel/PrimitiveRecursive.agda
   arity-indexed primitive recursive functions/relations 的语法和解释函数。
+  `PRF` 的 data constructors 只保留 zero/suc/proj/comp/prec。
 
 Godel/PRRepresentability.agda
   PA 表示 primitive recursive functions/relations 的接口，
-  并证明 zero/successor/projection 三类基础函数的表示性。
+  并给出最小基 PRF/PRRel 的结构递归表示性闭包入口；
+  composition 使用中间 graph 合取；基础 primitive recursion closure 保持兼容，
+  PA-history 版本由 PRHistoryFormula 单独给出。
+
+Godel/PRBooleanHelpers.agda
+  加法、乘法、前驱、isZero、not、and、or 等基础 PR helper。
+
+Godel/PRSequenceCoding.agda
+  primitive recursion 的完整 PA 表示性证明所需的 sequence coding 接口，
+  包括 seqLength/seqNth/history-valid 的 correctness 和 substitution 稳定性义务。
+
+Godel/PRHistoryCoding.agda
+  primitive recursion 的 meta-level history、historyCode、historyLength、
+  historyNthDefault 以及 evalHistory 的基础引理；historyCode 现在使用
+  可 fuelled round-trip 的 canonical nat-list 编码。
+
+Godel/PRHistoryFormula.agda
+  PA 内部递归历史公式入口：historyResultFormula 具有 ∃s、seqLength、
+  history-valid、seqNth 约束；同时提供 history-backed closure 的桥接版本
+  和纯 history formula closure 的 uniqueness 目标。
+
+Godel/PRConcreteSequenceCoding.agda
+  concrete sequence coding 的 PRF 候选和 correctness obligations；
+  目前不伪造无条件 concretePRSequenceCoding。
+
+Godel/PRConcreteHistoryValid.agda
+  concrete history-valid checker 的 PRF 候选，以及从 sequence/history
+  obligations 组装 PRPrimitiveRecursionInfrastructure 的 adapter。
+
+Godel/CanonicalCodePR.agda
+  canonical code tree/list destructors 的 PR helper 入口和表示性包装。
 
 Godel/SyntaxCodingPR.agda
   记录 canonical syntax coding、decode、formulaEq、subst0、diag
   被 primitive recursive relations 精确刻画所需的证明目标。
+
+Godel/SyntaxCodingPRDerived.agda
+  将 canonical decode、formulaEq、subst0、diag checker 作为 derived PRF
+  definitions 暴露。当前版本依赖旧 checker 思路，等待下一阶段用真正
+  numeric PR decoder 重建。
+
+Godel/SyntaxCodingPRCheckers.agda
+  将 canonical decode、formulaEq、subst0、diag checker 暴露为 PR relations。
+
+Godel/SyntaxCodingPRSoundness.agda
+  证明这些 PR checker 与现有 executable checked graph 层 sound/complete。
+
+Godel/SyntaxCodingPRInstances.agda
+  将 SyntaxCodingPR 及其 PR relation 表示性打包成 PACheckedGraphPRInputs。
+
+Godel/SyntaxCodingPRConcrete.agda
+  旧 concrete SyntaxCodingPR 实例文件；当前不由 Everything 导入，
+  等待下一阶段在无 evaluator oracle 的前提下重建。
 
 Godel/RepresentabilityTargets.agda
   Subst0Rel/DiagRel 表示 graph 目标的通用接口，
@@ -179,9 +228,17 @@ PA-first-incompleteness :
 
 1. **表示性引理**：PA 能表达 proof-checker 的正例和反例。
 2. **对角化/不动点引理**：对任意一元公式 φ，PA 能构造并证明 θ ↔ φ(⌜θ⌝)。
-3. **完整 PR 表示性闭包**：当前已经有 PR 语法、解释函数和基础函数表示性；
-   还需要证明 composition 和 primitive recursion 的 PA 表示性闭包，
-   再把 decode、formulaEq、subst0、diag 作为 PR 实例推出。
+3. **Syntax checker 最小基展开**：当前 `PRF` 的 constructor 和 evaluator
+   已收紧为 `zero/suc/proj/comp/prec` 的最小基，PR 表示性入口也改为
+   结构递归闭包；composition graph 已脱离 closure 的
+   `evaluatedGraphFormula`。primitive recursion 现在另有 PA-history 公式
+   入口，显式包含 ∃s、sequence length、history-valid、nth 约束；当前
+   history-backed closure 仍用 evaluated 左支撑处理唯一性，下一步是把这个
+   左支撑替换为 sequence-coded history uniqueness。historyCode 已改成可
+   round-trip 的 canonical nat-list 编码；sequence/history concrete 模块
+   现在列出 PRF 候选和必须补齐的 correctness obligations，但不会把这些
+   obligations 当作已证明实例。之后再用真正的 numeric PR decoder 重建
+   `SyntaxCodingPRConcrete`，并把 proof predicate checker 纳入同一路线。
 
 在本工程中，这两个部分以 record 字段给出：
 

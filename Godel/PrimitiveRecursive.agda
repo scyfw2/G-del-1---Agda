@@ -37,8 +37,8 @@ evalPrec : {n : ℕ} → PRF n → PRF (suc (suc n)) → ℕ → Vec ℕ n → �
 evalPRF zeroF xs = zero
 evalPRF sucF (x ∷ []) = suc x
 evalPRF (projF i) xs = lookup i xs
-evalPRF (compF f gs) xs = evalPRF f (evalPRFs gs xs)
 evalPRF (precF g h) (x ∷ xs) = evalPrec g h x xs
+evalPRF (compF f gs) xs = evalPRF f (evalPRFs gs xs)
 
 evalPRFs [] xs = []
 evalPRFs (f ∷ fs) xs = evalPRF f xs ∷ evalPRFs fs xs

@@ -22,6 +22,14 @@ DecodeFormulaNatCode input-code output-code =
     (decodeNatFormula input-code ≡ just A) ×
     (output-code ≡ canonicalNatFormula A))
 
+TermEqNatCode : ℕ → ℕ → Set
+TermEqNatCode left-code right-code =
+  Σ Term (λ s →
+  Σ Term (λ t →
+    (decodeNatTerm left-code ≡ just s) ×
+    ((decodeNatTerm right-code ≡ just t) ×
+     (termEq s t ≡ true))))
+
 FormulaEqNatCode : ℕ → ℕ → Set
 FormulaEqNatCode left-code right-code =
   Σ Formula (λ A →

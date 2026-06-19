@@ -62,6 +62,28 @@ codeDerivation axCode (add-cong-rule {a} {b} {c} {d}) =
   tag twelve (pair (codeTerm a) (pair (codeTerm b) (pair (codeTerm c) (codeTerm d))))
 codeDerivation axCode (mul-cong-rule {a} {b} {c} {d}) =
   tag thirteen (pair (codeTerm a) (pair (codeTerm b) (pair (codeTerm c) (codeTerm d))))
+codeDerivation axCode (exists-eliminate {A} {B}) =
+  tag twentyone (pair (codeFormula A) (codeFormula B))
+codeDerivation axCode (and-introduce {A} {B}) =
+  tag (suc twentyone) (pair (codeFormula A) (codeFormula B))
+codeDerivation axCode (and-elim-left {A} {B}) =
+  tag (suc (suc twentyone)) (pair (codeFormula A) (codeFormula B))
+codeDerivation axCode (and-elim-right {A} {B}) =
+  tag (suc (suc (suc twentyone))) (pair (codeFormula A) (codeFormula B))
+codeDerivation axCode (or-intro-left {A} {B}) =
+  tag (suc (suc (suc (suc twentyone)))) (pair (codeFormula A) (codeFormula B))
+codeDerivation axCode (or-intro-right {A} {B}) =
+  tag (suc (suc (suc (suc (suc twentyone))))) (pair (codeFormula A) (codeFormula B))
+codeDerivation axCode (eq-unique-value {y} {z} {c}) =
+  tag (suc (suc (suc (suc (suc (suc twentyone)))))) (pair (codeTerm y) (pair (codeTerm z) (codeTerm c)))
+codeDerivation axCode (and-left-imp {A} {B} {C} {D} {E}) =
+  tag (suc (suc (suc (suc (suc (suc (suc twentyone)))))))
+      (pair (codeFormula A)
+        (pair (codeFormula B)
+          (pair (codeFormula C)
+            (pair (codeFormula D) (codeFormula E)))))
+codeDerivation axCode (closed-numeral-neq m n neq) =
+  tag (suc (suc (suc (suc (suc (suc (suc (suc twentyone)))))))) (pair m n)
 
 codePAProof : {A : Formula} → PA-provable A → ℕ
 codePAProof = codeDerivation codePAAxiom

@@ -2,6 +2,8 @@
 
 module Godel.ProofSystem where
 
+open import Agda.Builtin.Nat renaming (Nat to ℕ)
+open import Godel.Core
 open import Godel.Syntax
 
 -- A small Hilbert-style proof calculus parameterized by an axiom predicate.
@@ -31,6 +33,24 @@ data Derives (Ax : Formula → Set) : Formula → Set where
   exists-introduce    : {A : Formula} → (t : Term) →
                         Derives Ax (subst0 t A ⇒ ∃ᶠ A)
 
+  exists-eliminate    : {A B : Formula} →
+                        Derives Ax ((∀ᶠ (A ⇒ wkFormula B)) ⇒ (∃ᶠ A ⇒ B))
+
+  and-introduce       : {A B : Formula} →
+                        Derives Ax (A ⇒ (B ⇒ (A ∧ B)))
+
+  and-elim-left       : {A B : Formula} →
+                        Derives Ax ((A ∧ B) ⇒ A)
+
+  and-elim-right      : {A B : Formula} →
+                        Derives Ax ((A ∧ B) ⇒ B)
+
+  or-intro-left       : {A B : Formula} →
+                        Derives Ax (A ⇒ (A ∨ B))
+
+  or-intro-right      : {A B : Formula} →
+                        Derives Ax (B ⇒ (A ∨ B))
+
   eq-refl-rule        : (t : Term) →
                         Derives Ax (t ≈ t)
 
@@ -48,6 +68,18 @@ data Derives (Ax : Formula → Set) : Formula → Set where
 
   mul-cong-rule       : {a b c d : Term} →
                         Derives Ax (a ≈ b ⇒ (c ≈ d ⇒ (a *ᵗ c) ≈ (b *ᵗ d)))
+
+  eq-unique-value     : {y z c : Term} →
+                        Derives Ax (y ≈ c ⇒ (z ≈ c ⇒ y ≈ z))
+
+  and-left-imp        : {A B C D E : Formula} →
+                        Derives Ax
+                          ((A ⇒ (C ⇒ E)) ⇒
+                           ((A ∧ B) ⇒ ((C ∧ D) ⇒ E)))
+
+  closed-numeral-neq  : (m n : ℕ) →
+                        ¬ (m ≡ n) →
+                        Derives Ax (¬ᶠ (numeral m ≈ numeral n))
 
 -- The object theory proves A if A is derivable from its axiom predicate.
 ProvableFrom : (Formula → Set) → Formula → Set

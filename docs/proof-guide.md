@@ -359,8 +359,12 @@ fully expanded PA formalization.
    explicit.
 
 16. `Godel.PrimitiveRecursive`, `Godel.PRRepresentability`,
-    `Godel.SyntaxCodingPR`, `Godel.PACheckedGraphPRTargets`, and
-    `Godel.PACheckedGraphPRProofs`
+    `Godel.PRBooleanHelpers`, `Godel.PRSequenceCoding`,
+    `Godel.PRHistoryCoding`, `Godel.PRHistoryFormula`,
+    `Godel.PRConcreteSequenceCoding`, `Godel.PRConcreteHistoryValid`,
+    `Godel.CanonicalCodePR`,
+    `Godel.SyntaxCodingPR`,
+    `Godel.PACheckedGraphPRTargets`, and `Godel.PACheckedGraphPRProofs`
 
    These modules start the non-staging primitive-recursive route.  The project
    now has arity-indexed primitive recursive functions and relations:
@@ -370,12 +374,42 @@ fully expanded PA formalization.
    PRRel : ℕ → Set
    ```
 
-   and an evaluator `evalPRF`.  `Godel.PRRepresentability` defines what it
-   means for PA to represent a PR function or relation and proves the basic
-   zero, successor, and projection function cases.  The composition and
-   primitive-recursion closure steps are explicitly separated as remaining
-   targets, because proving them requires PA-coded existential witnesses,
-   sequence coding, and bounded reasoning.
+   and an evaluator `evalPRF`.  The `PRF` data type now has only the minimal
+   constructor basis `zeroF`, `sucF`, `projF`, `compF`, and `precF`; the
+   evaluator has no special cases for syntax checkers.
+   `Godel.PRRepresentability` defines what it means for PA to represent a PR
+   function or relation, strengthens function
+   representations with uniqueness and meta-level existence fields, and exposes
+   `composition-closes`, `primitive-recursion-closes`, `prf-represented`, and
+   `prrel-represented` through a structure-recursive entry point.  Composition
+   graphs are no longer represented by directly evaluating `compF`; they are
+   built from the graph of the outer function plus the graphs of the intermediate
+   functions.  The new PA-facing primitive-recursion history entry is
+   `Godel.PRHistoryFormula.historyResultFormula`, whose body explicitly names
+   an existential history code together with `seqLength`, `history-valid`, and
+   `seqNth` graph constraints.
+
+   `Godel.PRBooleanHelpers` names basic PR helper functions such as addition,
+   multiplication, predecessor, truncated subtraction, zero-test, comparison,
+   Boolean negation, conjunction, disjunction, and conditionals.
+   `Godel.PRHistoryCoding` remains meta-level: it defines `evalHistory`,
+   `historyCode`, `historyLength`, and `historyNthDefault`.  The history code is
+   now a canonical nat-list code with a fuelled round-trip decoder, replacing
+   the earlier non-injective placeholder.
+   `Godel.PRSequenceCoding` records the finite-sequence coding substrate still
+   needed for a fully uniform primitive-recursion representability theorem,
+   including correctness and substitution-stability obligations for the history
+   formulas.
+   `Godel.PRHistoryFormula` provides a history-backed closure bridge.  That
+   bridge carries the new PA-history witness formula, while uniqueness is still
+   supported by the evaluated graph conjunct until the sequence-coded history
+   uniqueness proof is internalized.
+   `Godel.PRConcreteSequenceCoding` and `Godel.PRConcreteHistoryValid` name the
+   concrete PRF candidates and the remaining correctness obligations needed to
+   assemble a `PRPrimitiveRecursionInfrastructure`; they deliberately do not
+   manufacture an unconditional instance while those obligations remain open.
+   `Godel.CanonicalCodePR` gives the canonical code tree/list helper entry
+   points used by this route.
 
    `Godel.PACheckedGraphPRTargets` gives the final checked graph target shape
    for this route.  Instead of using bare uninterpreted `Rel` symbols, it is
@@ -384,11 +418,12 @@ fully expanded PA formalization.
    of those formulas is the full PR representability theorem.
 
    `Godel.SyntaxCodingPR` states the precise bridge still needed between the
-   executable Agda checkers and primitive-recursive relations.  It asks for PR
-   relations that are sound and complete for decoding, formula equality,
-   substitution, and diagonalization.  `Godel.PACheckedGraphPRProofs` then
-   shows that such PR relations, together with PA representations of those
-   relations, are enough to assemble `PACheckedGraphPRRepresentability`.
+   executable Agda checkers and primitive-recursive relations.  The older
+   `SyntaxCodingPRDerived` / `SyntaxCodingPRConcrete` files are kept in the
+   repository as scaffolding, but they are no longer imported by
+   `Godel.Everything`, because the old concrete checker route depended on
+   special evaluator behavior.  Rebuilding that route from real numeric PR
+   decoders is the next stage.
 
 ## Main Proof Path
 
@@ -405,7 +440,8 @@ noProofsTemplate
   -> PA object logic / equality reasoning from proof-system rules
   -> PA closed numeral arithmetic from PA axioms
   -> decomposition into decode / formulaEq / subst0 / diag PA targets
-  -> SyntaxCodingPR bridge: checked graph relations are PR
+  -> future minimal-basis SyntaxCodingPR checker instance
+  -> SyntaxCodingPRInstances / PR checked graph packaging
   -> PA representations of those PR relations
   -> primitive-recursive formulas for decode / formulaEq / subst0 / diag
   -> PR checked graph representability target
@@ -468,12 +504,22 @@ axioms.
 The project does not use staging graph axiom schemas as a substitute for
 representability.  The older `DiagRel` / `Subst0Rel` wrappers remain useful as
 scaffolding, but the non-staging route is now separated in
-`PACheckedGraphPRTargets`: final PA graph proofs should be built from concrete
+`PACheckedGraphPRTargets`: final PA graph proofs are built from concrete
 arithmetical formulas generated by PR representability, not from uninterpreted
-relation symbols.  The remaining large tasks are to prove the PR
-representability closure steps, show the syntax coding algorithms are PR, use
-those facts to instantiate the PR checked graph targets, connect the result to
-a noProofs fixed point, and eventually discharge the proof predicate fields in
+relation symbols.  The current PR layer keeps the `PRF` constructor set and
+evaluator at the minimal basis and provides a structure-recursive
+representability entry point for PR functions and relations.  The closure
+formula layer now separates composition graphs from raw evaluator equations and
+adds a PA-facing primitive-recursion history formula with an existential history
+code, sequence-length graph, history-valid checker graph, and final `nth`
+graph.  The current history-backed closure is intentionally a bridge: it
+includes that PA-history formula but still uses the evaluated graph conjunct for
+uniqueness.  The next proof step is to replace that remaining support with a
+sequence-coded history uniqueness argument.
+
+The remaining large tasks are to rebuild the syntax checker PR instance without
+evaluator special cases, connect the PR checked graph result to a noProofs fixed
+point, and eventually discharge the proof predicate fields in
 `PARepresentability`.
 
 Because these are record fields rather than postulates, the checked theorem is

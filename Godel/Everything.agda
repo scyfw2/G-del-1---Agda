@@ -10,7 +10,15 @@ import Godel.DecidableCoding
 import Godel.DiagonalCoding
 import Godel.ComputableGraphs
 import Godel.PrimitiveRecursive
+import Godel.PAProofCombinators
 import Godel.PRRepresentability
+import Godel.PRBooleanHelpers
+import Godel.PRSequenceCoding
+import Godel.PRHistoryCoding
+import Godel.PRHistoryFormula
+import Godel.PRConcreteSequenceCoding
+import Godel.PRConcreteHistoryValid
+import Godel.CanonicalCodePR
 import Godel.SyntaxCodingPR
 import Godel.RepresentabilityTargets
 import Godel.NoProofsDiagonalization
