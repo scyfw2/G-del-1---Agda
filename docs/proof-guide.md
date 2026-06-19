@@ -359,7 +359,9 @@ fully expanded PA formalization.
    explicit.
 
 16. `Godel.PrimitiveRecursive`, `Godel.PRRepresentability`,
-    `Godel.PRBooleanHelpers`, `Godel.PRSequenceCoding`,
+    `Godel.PRBooleanHelpers`, `Godel.PRBoundedSearch`,
+    `Godel.PRDigitCoding`, `Godel.PRNatListDecoder`,
+    `Godel.PRSequenceCoding`,
     `Godel.PRHistoryCoding`, `Godel.PRHistoryFormula`,
     `Godel.PRConcreteSequenceCoding`, `Godel.PRConcreteHistoryValid`,
     `Godel.CanonicalCodePR`,
@@ -392,6 +394,16 @@ fully expanded PA formalization.
    `Godel.PRBooleanHelpers` names basic PR helper functions such as addition,
    multiplication, predecessor, truncated subtraction, zero-test, comparison,
    Boolean negation, conjunction, disjunction, and conditionals.
+   `Godel.PRArithmeticSemantics` proves their small-step meta semantics.
+   `Godel.PRBoundedSearch`, `Godel.PRDigitCoding`,
+   `Godel.PRDigitSemantics`, `Godel.PRNatListDecoder`,
+   `Godel.PRNatListDigitStream`, and
+   `Godel.PRNatListDecoderSemantics` start the concrete numeric decoder layer:
+   constants, base-4 digit destructors, minimal-basis PRF candidates for
+   `seqLengthF` and `seqNthF`, and evalPRF-to-meta correctness for those
+   candidates.  The finite digit stream layer proves the code/digit
+   correspondence, complete nonzero digit counting, and the bounded active
+   scanner list induction used by `seqNth`.
    `Godel.PRHistoryCoding` remains meta-level: it defines `evalHistory`,
    `historyCode`, `historyLength`, and `historyNthDefault`.  The history code is
    now a canonical nat-list code with a fuelled round-trip decoder, replacing
@@ -406,8 +418,12 @@ fully expanded PA formalization.
    uniqueness proof is internalized.
    `Godel.PRConcreteSequenceCoding` and `Godel.PRConcreteHistoryValid` name the
    concrete PRF candidates and the remaining correctness obligations needed to
-   assemble a `PRPrimitiveRecursionInfrastructure`; they deliberately do not
-   manufacture an unconditional instance while those obligations remain open.
+   assemble a `PRPrimitiveRecursionInfrastructure`.  The sequence candidates for
+   length and nth are now real minimal-basis PRFs with semantic mirror lemmas;
+   both `seqLength` and `seqNth` are proved correct for `historyCode`, so
+   `Godel.PRConcreteSequenceCoding` exports an unconditional
+   `concretePRSequenceCoding : PRSequenceCoding`.  The remaining concrete
+   sequence/history work is the bounded-step `history-validF` checker.
    `Godel.CanonicalCodePR` gives the canonical code tree/list helper entry
    points used by this route.
 
@@ -515,7 +531,9 @@ code, sequence-length graph, history-valid checker graph, and final `nth`
 graph.  The current history-backed closure is intentionally a bridge: it
 includes that PA-history formula but still uses the evaluated graph conjunct for
 uniqueness.  The next proof step is to replace that remaining support with a
-sequence-coded history uniqueness argument.
+sequence-coded history uniqueness argument, starting from the now-complete
+`seqLengthF` / `seqNthF` concrete sequence coding and the still-open
+`history-validF` bounded-step checker.
 
 The remaining large tasks are to rebuild the syntax checker PR instance without
 evaluator special cases, connect the PR checked graph result to a noProofs fixed

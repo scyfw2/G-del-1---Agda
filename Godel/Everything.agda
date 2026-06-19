@@ -13,6 +13,13 @@ import Godel.PrimitiveRecursive
 import Godel.PAProofCombinators
 import Godel.PRRepresentability
 import Godel.PRBooleanHelpers
+import Godel.PRBoundedSearch
+import Godel.PRArithmeticSemantics
+import Godel.PRDigitCoding
+import Godel.PRDigitSemantics
+import Godel.PRNatListDecoder
+import Godel.PRNatListDigitStream
+import Godel.PRNatListDecoderSemantics
 import Godel.PRSequenceCoding
 import Godel.PRHistoryCoding
 import Godel.PRHistoryFormula

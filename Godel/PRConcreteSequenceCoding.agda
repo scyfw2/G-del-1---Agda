@@ -3,21 +3,21 @@
 module Godel.PRConcreteSequenceCoding where
 
 open import Agda.Builtin.Nat renaming (Nat to ℕ)
-open import Agda.Builtin.List using (List)
+open import Agda.Builtin.List using (List; []; _∷_)
 open import Godel.Core
 open import Godel.PrimitiveRecursive
 open import Godel.PRRepresentability
 open import Godel.PRSequenceCoding
+open import Godel.PRNatListDecoder
+open import Godel.PRNatListDecoderSemantics
+open import Godel.PRNatListDigitStream
 import Godel.PRHistoryCoding as History
 
--- These are intentionally ordinary PRF definitions, not new PRF
--- constructors.  The next implementation step is to replace the placeholders
--- with minimal-basis PRF programs that decode History.historyCode.
 seqLengthF-candidate : PRF (suc zero)
-seqLengthF-candidate = zeroF
+seqLengthF-candidate = seqLengthF
 
 seqNthF-candidate : PRF (suc (suc zero))
-seqNthF-candidate = zeroF
+seqNthF-candidate = seqNthF
 
 seqAppendF-candidate : PRF (suc (suc zero))
 seqAppendF-candidate = zeroF
@@ -27,6 +27,60 @@ seqUpdateF-candidate = zeroF
 
 seqAllF-candidate : PRF (suc (suc zero))
 seqAllF-candidate = zeroF
+
+seqLength-empty-example :
+  evalPRF seqLengthF-candidate (History.historyCode [] ∷ []) ≡ zero
+seqLength-empty-example = refl
+
+seqLength-single-zero-example :
+  evalPRF seqLengthF-candidate (History.historyCode (zero ∷ []) ∷ []) ≡
+  suc zero
+seqLength-single-zero-example = refl
+
+seqNth-single-zero-example :
+  evalPRF seqNthF-candidate (History.historyCode (zero ∷ []) ∷ zero ∷ []) ≡
+  zero
+seqNth-single-zero-example = refl
+
+seqNth-single-one-example :
+  evalPRF seqNthF-candidate
+    (History.historyCode (suc zero ∷ []) ∷ zero ∷ []) ≡
+  suc zero
+seqNth-single-one-example = refl
+
+seqNth-out-of-bounds-example :
+  evalPRF seqNthF-candidate
+    (History.historyCode (suc zero ∷ []) ∷ suc zero ∷ []) ≡
+  zero
+seqNth-out-of-bounds-example = refl
+
+seqLength-correct-concrete :
+  (history : List ℕ) →
+  evalPRF seqLengthF-candidate (History.historyCode history ∷ []) ≡
+  History.historyLength history
+seqLength-correct-concrete history
+  rewrite seqLengthF-correct-to-meta (History.historyCode history) =
+  seqLengthNat-historyCode history
+
+seqNth-correct-to-digit-stream :
+  (history : List ℕ) → (index : ℕ) →
+  evalPRF seqNthF-candidate (History.historyCode history ∷ index ∷ []) ≡
+  seqNthDigitsUpTo
+    (scanBound (natListDigits history))
+    (natListDigits history)
+    index
+seqNth-correct-to-digit-stream history index
+  rewrite seqNthF-correct-to-meta (History.historyCode history) index =
+  seqNthNat-historyCode-as-digits history index
+
+seqNth-correct-concrete :
+  (history : List ℕ) → (index : ℕ) →
+  evalPRF seqNthF-candidate (History.historyCode history ∷ index ∷ []) ≡
+  History.historyNthDefault history index zero
+seqNth-correct-concrete history index =
+  trans
+    (seqNth-correct-to-digit-stream history index)
+    (seqNthDigitsUpTo-natListDigits history index)
 
 record PRConcreteSequenceCodingObligations : Set₁ where
   field
@@ -59,3 +113,15 @@ concretePRSequenceCoding-fromObligations obligations = record
   ; seqNth-correct =
       PRConcreteSequenceCodingObligations.seqNth-correct obligations
   }
+
+concretePRSequenceCoding-obligations :
+  PRConcreteSequenceCodingObligations
+concretePRSequenceCoding-obligations = record
+  { seqLength-correct = seqLength-correct-concrete
+  ; seqNth-correct = seqNth-correct-concrete
+  }
+
+concretePRSequenceCoding : PRSequenceCoding
+concretePRSequenceCoding =
+  concretePRSequenceCoding-fromObligations
+    concretePRSequenceCoding-obligations

@@ -51,6 +51,31 @@ Godel/PRRepresentability.agda
 Godel/PRBooleanHelpers.agda
   加法、乘法、前驱、isZero、not、and、or 等基础 PR helper。
 
+Godel/PRBoundedSearch.agda
+  最小基 PRF 的常量函数 helper。
+
+Godel/PRArithmeticSemantics.agda
+  基础 PR helper 的 meta-level 语义证明，把 evalPRF 连接到干净的
+  Agda 自然数函数。
+
+Godel/PRDigitCoding.agda
+  base-4 数字层的 derived PRF：mod4、div4、按位置取 digit。
+
+Godel/PRDigitSemantics.agda
+  mod4/div4/iterated-div4/digitAt 的语义镜像和 appendDigit head/tail 引理。
+
+Godel/PRNatListDecoder.agda
+  基于 digit 计数的 nat-list decoder PRF 候选，包括 seqLengthF 和 seqNthF。
+
+Godel/PRNatListDigitStream.agda
+  historyCode 的 finite digit stream 视图，证明编码对应、非零 digit 的完整
+  计数、seqNth active scanner 的超界稳定性，以及 nat-list 上的最终 nth
+  归纳定理。
+
+Godel/PRNatListDecoderSemantics.agda
+  seqLengthF/seqNthF 的 evalPRF-to-meta 语义证明；seqLength 已连接到
+  historyLength，seqNth 已连接到 finite digit stream 的 active scanner 语义。
+
 Godel/PRSequenceCoding.agda
   primitive recursion 的完整 PA 表示性证明所需的 sequence coding 接口，
   包括 seqLength/seqNth/history-valid 的 correctness 和 substitution 稳定性义务。
@@ -66,8 +91,8 @@ Godel/PRHistoryFormula.agda
   和纯 history formula closure 的 uniqueness 目标。
 
 Godel/PRConcreteSequenceCoding.agda
-  concrete sequence coding 的 PRF 候选和 correctness obligations；
-  目前不伪造无条件 concretePRSequenceCoding。
+  concrete sequence coding 的最小基 PRF 候选、seqLength/seqNth correctness
+  证明，以及无条件导出的 concretePRSequenceCoding 实例。
 
 Godel/PRConcreteHistoryValid.agda
   concrete history-valid checker 的 PRF 候选，以及从 sequence/history
@@ -235,10 +260,12 @@ PA-first-incompleteness :
    入口，显式包含 ∃s、sequence length、history-valid、nth 约束；当前
    history-backed closure 仍用 evaluated 左支撑处理唯一性，下一步是把这个
    左支撑替换为 sequence-coded history uniqueness。historyCode 已改成可
-   round-trip 的 canonical nat-list 编码；sequence/history concrete 模块
-   现在列出 PRF 候选和必须补齐的 correctness obligations，但不会把这些
-   obligations 当作已证明实例。之后再用真正的 numeric PR decoder 重建
-   `SyntaxCodingPRConcrete`，并把 proof predicate checker 纳入同一路线。
+   round-trip 的 canonical nat-list 编码；seqLengthF/seqNthF 已有最小基 PRF
+   候选，并已有 evalPRF-to-meta 的语义镜像证明。seqLength/seqNth 都已证明
+   与 historyLength/historyNthDefault 一致，因此现在可以无条件导出
+   `concretePRSequenceCoding`。下一步是实现 `history-validF` 的 bounded step
+   checker，然后再重建 `SyntaxCodingPRConcrete`，并把 proof predicate checker
+   纳入同一路线。
 
 在本工程中，这两个部分以 record 字段给出：
 
