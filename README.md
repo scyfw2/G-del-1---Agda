@@ -51,6 +51,10 @@ Godel/PRRepresentability.agda
 Godel/PRBooleanHelpers.agda
   加法、乘法、前驱、isZero、not、and、or 等基础 PR helper。
 
+Godel/PRVectorHelpers.agda
+  arity-indexed PRF 投影向量 helper，用于在任意 arity 下从
+  `(x , s , xs...)` 这类输入中取出 tail 参数。
+
 Godel/PRBoundedSearch.agda
   最小基 PRF 的常量函数 helper。
 
@@ -94,9 +98,16 @@ Godel/PRConcreteSequenceCoding.agda
   concrete sequence coding 的最小基 PRF 候选、seqLength/seqNth correctness
   证明，以及无条件导出的 concretePRSequenceCoding 实例。
 
+Godel/PRHistoryValidCheckers.agda
+  history-validF 的最小基 PRF checker：检查 length、初值和 bounded step。
+
+Godel/PRHistoryValidSemantics.agda
+  history-validF 的 semantic mirror，证明 checker 等于干净的 meta-level
+  historyValidNat，并证明真实 evalHistory 被 checker 接受。
+
 Godel/PRConcreteHistoryValid.agda
-  concrete history-valid checker 的 PRF 候选，以及从 sequence/history
-  obligations 组装 PRPrimitiveRecursionInfrastructure 的 adapter。
+  concrete history-valid checker 的 adapter；当前只保留 history-body
+  substitution-stability 作为组装 PRPrimitiveRecursionInfrastructure 的剩余义务。
 
 Godel/CanonicalCodePR.agda
   canonical code tree/list destructors 的 PR helper 入口和表示性包装。
@@ -263,9 +274,10 @@ PA-first-incompleteness :
    round-trip 的 canonical nat-list 编码；seqLengthF/seqNthF 已有最小基 PRF
    候选，并已有 evalPRF-to-meta 的语义镜像证明。seqLength/seqNth 都已证明
    与 historyLength/historyNthDefault 一致，因此现在可以无条件导出
-   `concretePRSequenceCoding`。下一步是实现 `history-validF` 的 bounded step
-   checker，然后再重建 `SyntaxCodingPRConcrete`，并把 proof predicate checker
-   纳入同一路线。
+   `concretePRSequenceCoding`。`history-validF` 现在也已实现为最小基 bounded
+   step checker，并证明真实 evalHistory 会被接受。下一步是证明
+   history-body substitution-stability 和 sequence-coded history uniqueness，
+   然后再重建 `SyntaxCodingPRConcrete`，并把 proof predicate checker 纳入同一路线。
 
 在本工程中，这两个部分以 record 字段给出：
 

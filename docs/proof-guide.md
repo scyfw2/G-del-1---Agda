@@ -416,14 +416,17 @@ fully expanded PA formalization.
    bridge carries the new PA-history witness formula, while uniqueness is still
    supported by the evaluated graph conjunct until the sequence-coded history
    uniqueness proof is internalized.
-   `Godel.PRConcreteSequenceCoding` and `Godel.PRConcreteHistoryValid` name the
-   concrete PRF candidates and the remaining correctness obligations needed to
-   assemble a `PRPrimitiveRecursionInfrastructure`.  The sequence candidates for
-   length and nth are now real minimal-basis PRFs with semantic mirror lemmas;
-   both `seqLength` and `seqNth` are proved correct for `historyCode`, so
-   `Godel.PRConcreteSequenceCoding` exports an unconditional
-   `concretePRSequenceCoding : PRSequenceCoding`.  The remaining concrete
-   sequence/history work is the bounded-step `history-validF` checker.
+   `Godel.PRVectorHelpers`, `Godel.PRHistoryValidCheckers`,
+   `Godel.PRHistoryValidSemantics`, and `Godel.PRConcreteHistoryValid` continue
+   that concrete history route.  The sequence candidates for length and nth are
+   real minimal-basis PRFs with semantic mirror lemmas; both are proved correct
+   for `historyCode`, so `Godel.PRConcreteSequenceCoding` exports an
+   unconditional `concretePRSequenceCoding : PRSequenceCoding`.  The
+   `history-validF` checker is now also a minimal-basis bounded-step checker:
+   its semantic mirror proves agreement with `historyValidNat`, and real
+   `evalHistory` values are accepted.  The remaining infrastructure work is the
+   history-body substitution-stability obligation and the sequence-coded history
+   uniqueness proof.
    `Godel.CanonicalCodePR` gives the canonical code tree/list helper entry
    points used by this route.
 
@@ -532,7 +535,7 @@ graph.  The current history-backed closure is intentionally a bridge: it
 includes that PA-history formula but still uses the evaluated graph conjunct for
 uniqueness.  The next proof step is to replace that remaining support with a
 sequence-coded history uniqueness argument, starting from the now-complete
-`seqLengthF` / `seqNthF` concrete sequence coding and the still-open
+`seqLengthF` / `seqNthF` concrete sequence coding and the concrete
 `history-validF` bounded-step checker.
 
 The remaining large tasks are to rebuild the syntax checker PR instance without

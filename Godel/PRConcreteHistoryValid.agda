@@ -10,32 +10,16 @@ open import Godel.PrimitiveRecursive
 open import Godel.PRRepresentability
 open import Godel.PRSequenceCoding
 open import Godel.PRConcreteSequenceCoding
+open import Godel.PRHistoryValidCheckers public
+open import Godel.PRHistoryValidSemantics
 import Godel.PRHistoryCoding as History
 
--- Candidate PR checker for a coded primitive-recursion computation history.
--- This remains a minimal-basis PRF placeholder until the bounded traversal
--- over History.historyCode is implemented.
-history-validF-candidate :
-  {n : ℕ} →
-  PRF n →
-  PRF (suc (suc n)) →
-  PRF (suc (suc n))
-history-validF-candidate g h = zeroF
-
-record PRConcreteHistoryValidObligations
-    (sequence-obligations : PRConcreteSequenceCodingObligations) : Set₁ where
+-- The checker itself is concrete and verified in PRHistoryValidSemantics.
+-- The remaining obligation is only the syntactic substitution stability needed
+-- by PRHistoryFormula when the history code is introduced as an existential
+-- witness.
+record PRConcreteHistoryValidObligations : Set₁ where
   field
-    history-valid-correct :
-      {n : ℕ} →
-      (g : PRF n) →
-      (h : PRF (suc (suc n))) →
-      (x : ℕ) →
-      (xs : Vec ℕ n) →
-      evalPRF
-        (history-validF-candidate g h)
-        (x ∷ History.historyCode (History.evalHistory g h x xs) ∷ xs)
-      ≡ suc zero
-
     history-body-subst0 :
       {n : ℕ} →
       (g : PRF n) →
@@ -44,28 +28,25 @@ record PRConcreteHistoryValidObligations
       (y sequence-code : Term) →
       subst0 sequence-code
         (historyBodyFormulaFor
-          (concretePRSequenceCoding-fromObligations sequence-obligations)
+          concretePRSequenceCoding
           (prf-represented (history-validF-candidate g h))
           (wkVec xs)
           (wkTerm y)
           (var zero))
       ≡
       historyBodyFormulaFor
-        (concretePRSequenceCoding-fromObligations sequence-obligations)
+        concretePRSequenceCoding
         (prf-represented (history-validF-candidate g h))
         xs
         y
         sequence-code
 
 concretePRPrimitiveRecursionInfrastructure-fromObligations :
-  (sequence-obligations : PRConcreteSequenceCodingObligations) →
-  PRConcreteHistoryValidObligations sequence-obligations →
+  PRConcreteHistoryValidObligations →
   PRPrimitiveRecursionInfrastructure
 concretePRPrimitiveRecursionInfrastructure-fromObligations
-  sequence-obligations
   history-obligations = record
-  { sequence-coding =
-      concretePRSequenceCoding-fromObligations sequence-obligations
+  { sequence-coding = concretePRSequenceCoding
   ; history-validF = history-validF-candidate
   ; history-valid-represented = λ g h →
       prf-represented (history-validF-candidate g h)
@@ -73,6 +54,5 @@ concretePRPrimitiveRecursionInfrastructure-fromObligations
       PRConcreteHistoryValidObligations.history-body-subst0
         history-obligations
   ; history-valid-correct =
-      PRConcreteHistoryValidObligations.history-valid-correct
-        history-obligations
+      history-valid-correct-concrete
   }
