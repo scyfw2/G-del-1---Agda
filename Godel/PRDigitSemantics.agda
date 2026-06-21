@@ -37,6 +37,45 @@ digitEqualsAtNat : ℕ → ℕ → ℕ → ℕ
 digitEqualsAtNat position input digit =
   eqNatNat (digitAtNat position input) digit
 
+suc4F-correct :
+  (n : ℕ) →
+  evalPRF suc4F (n ∷ []) ≡ suc (suc (suc (suc n)))
+suc4F-correct n = refl
+
+appendDigitStepF-correct :
+  (n r : ℕ) →
+  evalPRF appendDigitStepF (n ∷ r ∷ []) ≡
+  suc (suc (suc (suc r)))
+appendDigitStepF-correct n r = refl
+
+appendDigitF-correct :
+  (d : Digit) → (rest : ℕ) →
+  evalPRF (appendDigitF d) (rest ∷ []) ≡ appendDigit d rest
+appendDigitF-correct d0 zero
+  rewrite constF-correct (digitToNat d0) [] = refl
+appendDigitF-correct d1 zero
+  rewrite constF-correct (digitToNat d1) [] = refl
+appendDigitF-correct d2 zero
+  rewrite constF-correct (digitToNat d2) [] = refl
+appendDigitF-correct d3 zero
+  rewrite constF-correct (digitToNat d3) [] = refl
+appendDigitF-correct d0 (suc rest)
+  rewrite appendDigitF-correct d0 rest
+        | appendDigitStepF-correct rest (appendDigit d0 rest) =
+  refl
+appendDigitF-correct d1 (suc rest)
+  rewrite appendDigitF-correct d1 rest
+        | appendDigitStepF-correct rest (appendDigit d1 rest) =
+  refl
+appendDigitF-correct d2 (suc rest)
+  rewrite appendDigitF-correct d2 rest
+        | appendDigitStepF-correct rest (appendDigit d2 rest) =
+  refl
+appendDigitF-correct d3 (suc rest)
+  rewrite appendDigitF-correct d3 rest
+        | appendDigitStepF-correct rest (appendDigit d3 rest) =
+  refl
+
 mod4StepNat : ℕ → ℕ
 mod4StepNat r =
   ifZeroNat
@@ -172,3 +211,27 @@ digitAt-appendDigit-tail :
   digitAtNat position rest
 digitAt-appendDigit-tail position d rest
   rewrite iterDiv4Nat-appendDigit-tail position d rest = refl
+
+mod4F-appendDigitF-correct :
+  (d : Digit) → (rest : ℕ) →
+  evalPRF
+    mod4F
+    (evalPRF (appendDigitF d) (rest ∷ []) ∷ [])
+  ≡ digitToNat d
+mod4F-appendDigitF-correct d rest
+  rewrite appendDigitF-correct d rest
+        | mod4F-correct (appendDigit d rest)
+        | mod4Nat-appendDigit d rest =
+  refl
+
+div4F-appendDigitF-correct :
+  (d : Digit) → (rest : ℕ) →
+  evalPRF
+    div4F
+    (evalPRF (appendDigitF d) (rest ∷ []) ∷ [])
+  ≡ rest
+div4F-appendDigitF-correct d rest
+  rewrite appendDigitF-correct d rest
+        | div4F-correct (appendDigit d rest)
+        | div4Nat-appendDigit d rest =
+  refl

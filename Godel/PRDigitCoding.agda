@@ -10,6 +10,12 @@ open import Godel.PRBoundedSearch
 open import Godel.CanonicalCoding
   using (Digit; d0; d1; d2; d3)
 
+digitToNat : Digit → ℕ
+digitToNat d0 = zero
+digitToNat d1 = suc zero
+digitToNat d2 = suc (suc zero)
+digitToNat d3 = suc (suc (suc zero))
+
 mod4StepF : PRF (suc (suc zero))
 mod4StepF =
   compF ifZeroF
@@ -56,8 +62,17 @@ isDigit2F = isDigitF (suc (suc zero))
 isDigit3F : PRF (suc zero)
 isDigit3F = isDigitF (suc (suc (suc zero)))
 
-digitToNat : Digit → ℕ
-digitToNat d0 = zero
-digitToNat d1 = suc zero
-digitToNat d2 = suc (suc zero)
-digitToNat d3 = suc (suc (suc zero))
+suc4F : PRF (suc zero)
+suc4F =
+  compF sucF
+    (compF sucF
+      (compF sucF
+        (compF sucF (projF fin0 ∷ []) ∷ []) ∷ []) ∷ [])
+
+appendDigitStepF : PRF (suc (suc zero))
+appendDigitStepF =
+  compF suc4F (projF fin1 ∷ [])
+
+appendDigitF : Digit → PRF (suc zero)
+appendDigitF d =
+  precF (constF (digitToNat d)) appendDigitStepF

@@ -102,6 +102,14 @@ andF-correct :
   (m n : ℕ) → evalPRF andF (m ∷ n ∷ []) ≡ mulNat m n
 andF-correct = mulF-correct
 
+orF-correct :
+  (m n : ℕ) →
+  evalPRF orF (m ∷ n ∷ []) ≡ isZeroNat (isZeroNat (m + n))
+orF-correct m n
+  rewrite addF-correct m n
+        | isZeroF-correct (m + n)
+        | isZeroF-correct (isZeroNat (m + n)) = refl
+
 lessEqF-correct :
   (m n : ℕ) → evalPRF lessEqF (m ∷ n ∷ []) ≡ lessEqNat m n
 lessEqF-correct m n
