@@ -6,6 +6,10 @@ open import Agda.Builtin.Nat renaming (Nat to ℕ)
 open import Godel.Core
 open import Godel.Syntax
 
+exists-prefix : ℕ → Formula → Formula
+exists-prefix zero A = A
+exists-prefix (suc n) A = ∃ᶠ (exists-prefix n A)
+
 -- A small Hilbert-style proof calculus parameterized by an axiom predicate.
 -- This is deliberately minimal: enough structure to expose modus ponens,
 -- universal elimination, and existential introduction used by arithmetic.
@@ -35,6 +39,29 @@ data Derives (Ax : Formula → Set) : Formula → Set where
 
   exists-eliminate    : {A B : Formula} →
                         Derives Ax ((∀ᶠ (A ⇒ wkFormula B)) ⇒ (∃ᶠ A ⇒ B))
+
+  exists-prefix-introduce-any :
+                        (k : ℕ) → {I A : Formula} →
+                        Derives Ax (I ⇒ exists-prefix k A)
+
+  exists-prefix-binary-lift :
+                        (k : ℕ) → {A B C D : Formula} →
+                        Derives Ax
+                          ((A ⇒ (B ⇒ D)) ⇒
+                           (exists-prefix k A ⇒
+                            (exists-prefix k B ⇒ C)))
+
+  exists-prefix-premise-map-any :
+                        (k : ℕ) → {E A B C D : Formula} →
+                        Derives Ax
+                          ((E ⇒ (A ⇒ B)) ⇒
+                           (E ⇒
+                            (exists-prefix k C ⇒ exists-prefix k D)))
+
+  premise-change-any  : {E E' A B : Formula} →
+                        Derives Ax
+                          ((E' ⇒ (A ⇒ B)) ⇒
+                           (E ⇒ (A ⇒ B)))
 
   and-introduce       : {A B : Formula} →
                         Derives Ax (A ⇒ (B ⇒ (A ∧ B)))
@@ -77,9 +104,71 @@ data Derives (Ax : Formula → Set) : Formula → Set where
                           ((A ⇒ (C ⇒ E)) ⇒
                            ((A ∧ B) ⇒ ((C ∧ D) ⇒ E)))
 
+  and-right-imp       : {A B C D E : Formula} →
+                        Derives Ax
+                          ((B ⇒ (D ⇒ E)) ⇒
+                           ((A ∧ B) ⇒ ((C ∧ D) ⇒ E)))
+
+  and-left-imp1       : {A B C E : Formula} →
+                        Derives Ax
+                          ((A ⇒ (C ⇒ E)) ⇒
+                           ((A ∧ B) ⇒ (C ⇒ E)))
+
+  and-right-imp1      : {A B C E : Formula} →
+                        Derives Ax
+                          ((B ⇒ (C ⇒ E)) ⇒
+                           ((A ∧ B) ⇒ (C ⇒ E)))
+
+  imp-and-intro2      : {A B C D : Formula} →
+                        Derives Ax
+                          ((A ⇒ (B ⇒ C)) ⇒
+                           ((A ⇒ (B ⇒ D)) ⇒
+                            (A ⇒ (B ⇒ (C ∧ D)))))
+
+  and-both-map        : {A B C D : Formula} →
+                        Derives Ax
+                          ((A ⇒ C) ⇒
+                           ((B ⇒ D) ⇒
+                            ((A ∧ B) ⇒ (C ∧ D))))
+
+  and-left-map        : {A B C : Formula} →
+                        Derives Ax
+                          ((A ⇒ C) ⇒
+                           ((A ∧ B) ⇒ (C ∧ B)))
+
+  premise-and-both-map :
+                        {E A B C D : Formula} →
+                        Derives Ax
+                          ((E ⇒ (A ⇒ C)) ⇒
+                           ((E ⇒ (B ⇒ D)) ⇒
+                            (E ⇒ ((A ∧ B) ⇒ (C ∧ D)))))
+
+  premise-and-left-map :
+                        {E A B C : Formula} →
+                        Derives Ax
+                          ((E ⇒ (A ⇒ C)) ⇒
+                           (E ⇒ ((A ∧ B) ⇒ (C ∧ B))))
+
+  body-unique-compose : {A B C D E F G : Formula} →
+                        Derives Ax
+                          ((A ⇒ (C ⇒ E)) ⇒
+                           ((E ⇒ (B ⇒ F)) ⇒
+                            ((F ⇒ (D ⇒ G)) ⇒
+                             ((A ∧ B) ⇒ ((C ∧ D) ⇒ G)))))
+
+  eq-subst-right      : {a b y : Term} →
+                        Derives Ax (a ≈ b ⇒ (y ≈ a ⇒ y ≈ b))
+
+  eq-subst-suc-right  : {a b y : Term} →
+                        Derives Ax (a ≈ b ⇒ (y ≈ sucᵗ a ⇒ y ≈ sucᵗ b))
+
   closed-numeral-neq  : (m n : ℕ) →
                         ¬ (m ≡ n) →
                         Derives Ax (¬ᶠ (numeral m ≈ numeral n))
+
+  contradiction-to-neg :
+                        {A B : Formula} →
+                        Derives Ax ((A ⇒ B) ⇒ (¬ᶠ B ⇒ ¬ᶠ A))
 
 -- The object theory proves A if A is derivable from its axiom predicate.
 ProvableFrom : (Formula → Set) → Formula → Set

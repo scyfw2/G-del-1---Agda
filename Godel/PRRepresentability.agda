@@ -2,6 +2,12 @@
 
 module Godel.PRRepresentability where
 
+-- Legacy/bootstrap representability layer.
+--
+-- This module still defines the public records used throughout the project and
+-- keeps the older evaluator-backed theorem path typechecking for compatibility.
+-- The final structured theorem entry point is Godel.PRRepresentabilityFinal.
+
 open import Agda.Builtin.Nat renaming (Nat to ℕ)
 open import Godel.Core
 open import Godel.Syntax

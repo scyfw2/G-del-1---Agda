@@ -20,6 +20,10 @@ nineteen  = suc eighteen
 twenty    = suc nineteen
 twentyone = suc twenty
 
+proofTagAfterTwentyone : ℕ → ℕ
+proofTagAfterTwentyone zero = twentyone
+proofTagAfterTwentyone (suc n) = suc (proofTagAfterTwentyone n)
+
 -- Codes for PA axiom evidence.
 codePAAxiom : {A : Formula} → PA A → ℕ
 codePAAxiom pa-suc-not-zero    = tag fourteen zero
@@ -64,26 +68,105 @@ codeDerivation axCode (mul-cong-rule {a} {b} {c} {d}) =
   tag thirteen (pair (codeTerm a) (pair (codeTerm b) (pair (codeTerm c) (codeTerm d))))
 codeDerivation axCode (exists-eliminate {A} {B}) =
   tag twentyone (pair (codeFormula A) (codeFormula B))
+codeDerivation axCode (exists-prefix-introduce-any k {I} {A}) =
+  tag (proofTagAfterTwentyone 1)
+      (pair k (pair (codeFormula I) (codeFormula A)))
+codeDerivation axCode (exists-prefix-binary-lift k {A} {B} {C} {D}) =
+  tag (proofTagAfterTwentyone 2)
+      (pair k
+        (pair (codeFormula A)
+          (pair (codeFormula B)
+            (pair (codeFormula C) (codeFormula D)))))
+codeDerivation axCode (exists-prefix-premise-map-any k {E} {A} {B} {C} {D}) =
+  tag (proofTagAfterTwentyone 3)
+      (pair k
+        (pair (codeFormula E)
+          (pair (codeFormula A)
+            (pair (codeFormula B)
+              (pair (codeFormula C) (codeFormula D))))))
+codeDerivation axCode (premise-change-any {E} {E'} {A} {B}) =
+  tag (proofTagAfterTwentyone 4)
+      (pair (codeFormula E)
+        (pair (codeFormula E')
+          (pair (codeFormula A) (codeFormula B))))
 codeDerivation axCode (and-introduce {A} {B}) =
-  tag (suc twentyone) (pair (codeFormula A) (codeFormula B))
+  tag (proofTagAfterTwentyone 5) (pair (codeFormula A) (codeFormula B))
 codeDerivation axCode (and-elim-left {A} {B}) =
-  tag (suc (suc twentyone)) (pair (codeFormula A) (codeFormula B))
+  tag (proofTagAfterTwentyone 6) (pair (codeFormula A) (codeFormula B))
 codeDerivation axCode (and-elim-right {A} {B}) =
-  tag (suc (suc (suc twentyone))) (pair (codeFormula A) (codeFormula B))
+  tag (proofTagAfterTwentyone 7) (pair (codeFormula A) (codeFormula B))
 codeDerivation axCode (or-intro-left {A} {B}) =
-  tag (suc (suc (suc (suc twentyone)))) (pair (codeFormula A) (codeFormula B))
+  tag (proofTagAfterTwentyone 8) (pair (codeFormula A) (codeFormula B))
 codeDerivation axCode (or-intro-right {A} {B}) =
-  tag (suc (suc (suc (suc (suc twentyone))))) (pair (codeFormula A) (codeFormula B))
+  tag (proofTagAfterTwentyone 9) (pair (codeFormula A) (codeFormula B))
 codeDerivation axCode (eq-unique-value {y} {z} {c}) =
-  tag (suc (suc (suc (suc (suc (suc twentyone)))))) (pair (codeTerm y) (pair (codeTerm z) (codeTerm c)))
+  tag (proofTagAfterTwentyone 10) (pair (codeTerm y) (pair (codeTerm z) (codeTerm c)))
 codeDerivation axCode (and-left-imp {A} {B} {C} {D} {E}) =
-  tag (suc (suc (suc (suc (suc (suc (suc twentyone)))))))
+  tag (proofTagAfterTwentyone 11)
       (pair (codeFormula A)
         (pair (codeFormula B)
           (pair (codeFormula C)
             (pair (codeFormula D) (codeFormula E)))))
+codeDerivation axCode (and-right-imp {A} {B} {C} {D} {E}) =
+  tag (proofTagAfterTwentyone 12)
+      (pair (codeFormula A)
+        (pair (codeFormula B)
+          (pair (codeFormula C)
+            (pair (codeFormula D) (codeFormula E)))))
+codeDerivation axCode (and-left-imp1 {A} {B} {C} {E}) =
+  tag (proofTagAfterTwentyone 13)
+      (pair (codeFormula A)
+        (pair (codeFormula B)
+          (pair (codeFormula C) (codeFormula E))))
+codeDerivation axCode (and-right-imp1 {A} {B} {C} {E}) =
+  tag (proofTagAfterTwentyone 14)
+      (pair (codeFormula A)
+        (pair (codeFormula B)
+          (pair (codeFormula C) (codeFormula E))))
+codeDerivation axCode (imp-and-intro2 {A} {B} {C} {D}) =
+  tag (proofTagAfterTwentyone 15)
+      (pair (codeFormula A)
+        (pair (codeFormula B)
+          (pair (codeFormula C) (codeFormula D))))
+codeDerivation axCode (and-both-map {A} {B} {C} {D}) =
+  tag (proofTagAfterTwentyone 16)
+      (pair (codeFormula A)
+        (pair (codeFormula B)
+          (pair (codeFormula C) (codeFormula D))))
+codeDerivation axCode (and-left-map {A} {B} {C}) =
+  tag (proofTagAfterTwentyone 17)
+      (pair (codeFormula A)
+        (pair (codeFormula B) (codeFormula C)))
+codeDerivation axCode (premise-and-both-map {E} {A} {B} {C} {D}) =
+  tag (proofTagAfterTwentyone 18)
+      (pair (codeFormula E)
+        (pair (codeFormula A)
+          (pair (codeFormula B)
+            (pair (codeFormula C) (codeFormula D)))))
+codeDerivation axCode (premise-and-left-map {E} {A} {B} {C}) =
+  tag (proofTagAfterTwentyone 19)
+      (pair (codeFormula E)
+        (pair (codeFormula A)
+          (pair (codeFormula B) (codeFormula C))))
+codeDerivation axCode (body-unique-compose {A} {B} {C} {D} {E} {F} {G}) =
+  tag (proofTagAfterTwentyone 20)
+      (pair (codeFormula A)
+        (pair (codeFormula B)
+          (pair (codeFormula C)
+            (pair (codeFormula D)
+              (pair (codeFormula E)
+                (pair (codeFormula F) (codeFormula G)))))))
+codeDerivation axCode (eq-subst-right {a} {b} {y}) =
+  tag (proofTagAfterTwentyone 21)
+      (pair (codeTerm a) (pair (codeTerm b) (codeTerm y)))
+codeDerivation axCode (eq-subst-suc-right {a} {b} {y}) =
+  tag (proofTagAfterTwentyone 22)
+      (pair (codeTerm a) (pair (codeTerm b) (codeTerm y)))
 codeDerivation axCode (closed-numeral-neq m n neq) =
-  tag (suc (suc (suc (suc (suc (suc (suc (suc twentyone)))))))) (pair m n)
+  tag (proofTagAfterTwentyone 23) (pair m n)
+codeDerivation axCode (contradiction-to-neg {A} {B}) =
+  tag (proofTagAfterTwentyone 24)
+      (pair (codeFormula A) (codeFormula B))
 
 codePAProof : {A : Formula} → PA-provable A → ℕ
 codePAProof = codeDerivation codePAAxiom
