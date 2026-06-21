@@ -6,7 +6,7 @@ open import Agda.Builtin.Nat renaming (Nat to ℕ)
 open import Godel.Core
 open import Godel.Syntax
 open import Godel.PrimitiveRecursive
-open import Godel.PRRepresentability
+open import Godel.PRRepresentabilityFinal
 open import Godel.PAObjectLogicProofs
 open import Godel.PACheckedGraphRelations
 open import Godel.ComputableGraphs

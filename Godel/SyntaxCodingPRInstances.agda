@@ -3,7 +3,7 @@
 module Godel.SyntaxCodingPRInstances where
 
 open import Godel.SyntaxCodingPR
-open import Godel.PRRepresentability
+open import Godel.PRRepresentabilityFinal
 open import Godel.PACheckedGraphPRProofs
 
 record SyntaxCodingPRInstanceData : Set₁ where
