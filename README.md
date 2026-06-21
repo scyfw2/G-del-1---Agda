@@ -9,6 +9,62 @@
 For an English walkthrough of the proof architecture, see
 [`docs/proof-guide.md`](docs/proof-guide.md).
 
+## Lean shadow proof
+
+本仓库现在包含一个独立的 Lean 4 shadow prototype：
+
+```text
+LeanShadow/
+```
+
+它不是 Agda formalization 的迁移，也不是低层编码证明的 Lean 重证。它把
+Agda 中已经完成或正在推进的低层工作声明为显式 interface/axiom，然后在 Lean
+里检查高层依赖链：
+
+```text
+ProofCodePA is PR
+→ PA represents ProofCodePA
+→ diagonal/noProofs fixed point
+→ first incompleteness theorem
+```
+
+可以用下面命令检查：
+
+```bash
+lake build LeanShadow
+```
+
+入口 theorem 在 `LeanShadow/FirstIncompleteness.lean`。其中
+`ProofCodePAPRData` 是 Agda 主线最终要提供的证明检查器 PR 数据；Lean shadow
+证明展示：一旦这个数据存在，就能通过 PA 表示所有 PR 关系、noProofs fixed
+point 和抽象不完备性定理得到 Gödel 句不可判定。
+
+`LeanShadow/Rule37Mini.lean` 是一个 rule37 小型实验：它使用简化的 pair-based
+code，而不是 Agda 的 canonical base-4 code，证明了 witness checker 与 bounded
+search 的 sound/complete 骨架。该实验保留 `fst_pair`、`snd_pair`、`pair_eta`
+和 `witnessBound` 为显式接口，正好对应 Agda 主线里 canonical parser
+correctness 和 witness bound 需要承担的部分。
+
+`LeanShadow/Rule37CanonicalMini.lean` 进一步用一个 toy canonical code 完成这些
+接口形状：证明 parser completeness/soundness、从 canonical parser target 推出
+closed rule37 code equality，以及 witness bound。它仍不是 Agda base-4 编码的
+替代证明，但说明 Lean 对这类 parser/equality/bound proof skeleton 的自动化
+比较顺手。
+
+`LeanShadow/Rule37Base4Mini.lean` 再进一步使用 base-4 digit stream toy model：
+natural payload 用若干 digit `2` 加终止 digit `0` 编码，atom 用 tag digit `1`，
+rule37 node 用 tag digit `3` 加 unary tag payload 和两个 atom children。该模块
+证明了 base-4 parser 的 complete/sound、从 parser success 推出 canonical
+digits/code equality，以及 witness bound by digit length。它仍比 Agda 的完整
+canonical code 简化，但已经更接近当前 rule37 parser/search 的真实证明形状。
+
+`LeanShadow/CodeListLengthMini.lean` 是针对当前 Agda 缺口的更小实验：
+它定义了 base-4-ish `Code` / `List Code` 编码、fuelled code-list parser、
+`codeListLengthCheck`，并证明 complete、sound 和 nonzero-sound。这个文件没有
+关闭 Agda 的 `code-list-length-pr`，但给出了一条可移植的证明模式：先证明
+with-rest parser 的 “fuel 大于编码长度则成功”，再证明 parser soundness，最后
+把 `checker ≠ 0` 转成 code-list-length 语义事实。
+
 ## 当前 PR 表示性状态
 
 PA represents all PR functions/relations 的第二步已经有最终 public boundary：
@@ -206,6 +262,13 @@ Godel/CanonicalCodeNodeSemantics.agda
   node parser 的 executable semantic mirror：用 `decodeCode` 解析 raw code，
   只接受 `node tag children`，并证明 canonical completeness 和 soundness
   回到 `NodeCodeNat`。
+
+Godel/CanonicalCodeNodeParserFromListLength.agda
+  full `NodeCodeNat` parser 的轻量 bridge。它把 node builder equality 与
+  code-list-length parser 组合起来：只要已有 `CanonicalCodeParserPR` 的
+  `code-list-length-pr` 以及对应 nonzero-sound，就能导出完整
+  `CanonicalCodeNodeParserPR`。因此 node parser 本身不再是 rule37 的
+  monolithic 缺口；剩余缺口被进一步缩到 concrete code-list-length parser。
 
 Godel/CanonicalCodeRawNodePR.agda
   proof checker 外层 node parser 的 concrete PR 入口。它定义
@@ -670,6 +733,27 @@ Godel/ProofRule37CanonicalWitness.agda
   `ProofRule37PR` 和通过
   `PRRepresentabilityFinal.prrel-represented` 的 PA 表示性 adapter 仍是后续完整
   rule relation 的接口。
+
+Godel/ProofRule37CanonicalSearch.agda
+  将 Lean shadow 里建议的 canonical witness search 分层落实为 Agda
+  boundary。它定义 bounded canonical witness 目标
+  `Rule37CanonicalBoundedWitnessExists`，并证明任意 canonical parser witness
+  都能给出 `m,n ≤ proof-code` 的 search bounds。模块现在还实现了
+  `rule37CanonicalWitnessF` 和 `rule37CanonicalSearchF`：给定一个 full
+  `CanonicalCodeNodeParserPR` 以及它的 nonzero soundness，就能导出
+  `proofRule37CanonicalBoundedSearchPR-from-node-parser` 和
+  `proofRule37CanonicalCheckingBranchData-from-node-parser`。也就是说，
+  rule37 的 bounded canonical witness search 本身已经接好；full
+  `NodeCodeNat` parser 现在可由 code-list-length parser 派生，剩余缺口被
+  进一步缩到 `code-list-length-pr` 的 concrete PR 实例及其 nonzero-sound。
+
+Godel/ProofRule37FromCodeListLength.agda
+  将剩余的 code-list-length parser obligation 接到 rule37 分支的最终入口：
+  给定 `CanonicalCodeParserPR` 和 `CodeListLengthNonzeroSound`，它先构造
+  `CanonicalCodeNodeParserSearchData`，再导出
+  `ProofRule37CheckingBranchData`。因此从 list-length parser 到 rule37
+  `proofCodePAPR` branch 的接线已经闭合；下一步只剩把 list-length parser
+  本身 concrete 化。
 
 Godel/ProofRule37PRHolds.agda
   rule37 witness checker 的轻量 `PRRel-holds` adapter。直接在

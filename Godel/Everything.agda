@@ -41,6 +41,7 @@ import Godel.CanonicalCodeParserTargets
 import Godel.CanonicalCodeParserSemantics
 import Godel.CanonicalCodeNodeTargets
 import Godel.CanonicalCodeNodeSemantics
+import Godel.CanonicalCodeNodeParserFromListLength
 import Godel.CanonicalCodeRawNodePR
 import Godel.CanonicalCodeRawListPR
 import Godel.CanonicalCodeRawAtomListPR
@@ -105,6 +106,8 @@ import Godel.ProofRule37ParserSearchSound
 import Godel.ProofRule37ParserSearchCorrect
 import Godel.ProofRule37CanonicalBridge
 import Godel.ProofRule37CanonicalWitness
+import Godel.ProofRule37CanonicalSearch
+import Godel.ProofRule37FromCodeListLength
 import Godel.ProofRule37Bounds
 import Godel.ProofRule37PRHolds
 import Godel.ProofRule37Search

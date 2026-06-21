@@ -492,6 +492,10 @@ fully expanded PA formalization.
    PA representability through the final PR theorem.  This layer is deliberately
    weaker than full `NodeCodeNat`: validating that the children-code is a
    canonical code list remains the job of the later list parser.
+   `Godel.CanonicalCodeNodeParserFromListLength` closes the full node-parser
+   target modulo that list parser: it combines node-builder equality with
+   `code-list-length-pr`, and derives `CanonicalCodeNodeParserPR` whenever the
+   code-list-length relation has nonzero soundness.
    `Godel.CanonicalCodeRawListPR` adds the analogous first branch layer for
    canonical code lists.  It exposes represented PR relations for nil and cons
    head digits, with canonical completeness and soundness back to the raw list
@@ -950,6 +954,24 @@ exactly for canonical witnesses, `proofRule37PR-from-canonical-witness-search`
 turns it into the final `ProofRule37PR` branch with a
 `PRRepresentabilityFinal` adapter.  This is the next concrete target after the
 raw parser-search route.
+
+`Godel.ProofRule37CanonicalSearch` makes that target bounded and branch-facing.
+It defines `Rule37CanonicalBoundedWitnessExists`, proves that a canonical parser
+witness supplies the search bounds `m,n <= proof-code`, and implements
+`rule37CanonicalWitnessF` plus `rule37CanonicalSearchF`.  Given a full
+`CanonicalCodeNodeParserPR` with nonzero soundness for its characteristic PRF,
+`proofRule37CanonicalBoundedSearchPR-from-node-parser` yields the bounded
+canonical search record, and
+`proofRule37CanonicalCheckingBranchData-from-node-parser` plugs it into
+`ProofCheckingRule37Branch`.  The full node parser can now be derived from a
+code-list-length parser, so the remaining concrete gap is narrower again:
+implement `code-list-length-pr` and its nonzero-sound theorem.
+
+`Godel.ProofRule37FromCodeListLength` closes that wiring explicitly.  Given a
+`CanonicalCodeParserPR` plus `CodeListLengthNonzeroSound`, it builds the full
+node-parser search data and then exports `ProofRule37CheckingBranchData`.  Thus
+the path from list-length parser correctness to the rule37 branch of
+`proofCodePAPR` is now a checked adapter rather than an informal next step.
 
 `ProofRuleTargets` also imports the matching formula-code builder:
 
