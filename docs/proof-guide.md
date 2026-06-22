@@ -479,6 +479,76 @@ fully expanded PA formalization.
    `decodeCodeListWithRest`, proves canonical completeness, and proves that
    successful parser results imply the corresponding target relation.  This is
    the semantic baseline for the later minimal-basis PRF parser implementation.
+   `Godel.CanonicalCodeListLengthCheck` now packages the length branch of that
+   baseline into a numeric checker.  It proves completeness, soundness, and
+   nonzero-sound for `codeListLengthCheck`, and gives an adapter saying that
+   any future PRF whose evaluator agrees with this checker immediately supplies
+   `CodeListLengthNonzeroSound`.  This does not yet implement the minimal-basis
+   `code-list-length-pr`; it makes the remaining obligation exactly the PRF
+   evaluator-correctness theorem.
+   `Godel.CanonicalCodeListLengthScanner` then narrows that evaluator target:
+   it defines a scanner that skips encoded nat/code payloads and computes only
+   the code-list length, proves agreement with `decodeCodeWithRest` /
+   `decodeCodeListWithRest`, and derives `codeListLengthScannerCheck =
+   codeListLengthCheck`.  The concrete minimal-basis PRF can now target this
+   scanner instead of reconstructing `List Code`.  Its
+   `CodeListLengthScannerPRCandidate` adapter makes the remaining theorem
+   precise: prove a PRF evaluator equals `codeListLengthScannerCheck`.
+   The Lean shadow module `LeanShadow.CodeListLengthStackMachineMini` now tests
+   the intended next implementation shape: an encoded control stack with one
+   transition per base-4 digit.  This is not a replacement proof for Agda's
+   `code-list-length-pr`; it is a small executable guide for the PRF state
+   machine that should be proved equal to the Agda scanner checker.  It now
+   proves canonical completeness for encoded code lists: running the stack
+   machine over `encodeCodeListWithRest codes []` returns `codes.length`.
+   `Godel.CanonicalCodeListLengthStackMachine` ports that induction back to
+   Agda at the explicit digit-stream level, giving the structure for the later
+   numeric-state proof.  `Godel.CanonicalCodeListLengthNumericState` then
+   ports the numeric-state bridge itself: encoded input rest, base-5 encoded
+   stack, valid transition lemmas for root/nested/code/nat frames, and the
+   prefix-length fuel induction over those valid transitions.  Running exactly
+   the encoded nat/code/list prefix length leaves the suffix untouched.  The
+   Lean shadow layer now also isolates the next evaluator target:
+   `stateStepF` should correspond to a stable semantic step, `stepNumStable`,
+   which agrees with the valid transitions but keeps the completed
+   `(rest=0, stack=0, ok=true)` state fixed.  The Lean prototype now splits
+   this target into branch-wise theorems for root/nested/code/nat, failure, and
+   done states.  Agda now ports the effective branch bridge in
+   `Godel.CanonicalCodeListLengthStateStepBranches`: the PRF evaluator for
+   root/nested/code/nat valid branches is proved to produce the corresponding
+   numeric stable transition.  Lean now also proves the next fuel layer:
+   `runStateStepEvalFuel` consumes a canonical code-list prefix and then remains
+   stable for arbitrary extra fuel after the completed state is reached.
+   `LeanShadow.CodeListLengthNumericEvalMini` now proves the canonical bound
+   `prefix length <= suc encoded-input`: the route is a `codeSize` /
+   `codeListSize` bridge, first bounding digit length by syntax size and then
+   showing the closed numeric code pays for `2 * codeListSize`.  This gives
+   fixed-fuel `suc input` canonical completeness on the Lean side.
+   `Godel.CanonicalCodeListLengthStatePRCompleteness` currently has the matching
+   conditional Agda bridge; the next Agda task is to port the size-bound proof,
+   then move on to arbitrary-input soundness.
+   `Godel.CanonicalCodeListLengthStatePR` is the Agda PRF-side version of that
+   guide: it defines `lengthScannerF : PRF 2`, with state encoded as the
+   canonical nat-list `[rest, stack, len, ok]` and a base-5 control stack.  It
+   already proves the state constructor/projection round-trip lemmas, plus
+   evaluator correctness for `ifBoolF/ifEqF`, `mod5F/div5F`, `pushFrameF`, and
+   the derived state fields.  `Godel.CanonicalCodeListLengthStateFuel` fixes the
+   Agda runner and additivity lemma for that fuel induction.  The split modules
+   `Godel.CanonicalCodeListLengthStateFuelNat`,
+   `Godel.CanonicalCodeListLengthStateFuelCode`, and
+   `Godel.CanonicalCodeListLengthStateFuelCodeList` prove the nat/code/list
+   prefix induction on the Agda side: running `stateStepF` for exactly the
+   current canonical prefix length leaves the suffix untouched.  The remaining
+   theorem is the final equation from `lengthScannerF` to
+   `codeListLengthScannerCheck`; once that is available, the existing candidate
+   adapters close the code-list-length parser branch.  The failure-side branch
+   facts needed for that theorem have now also been ported to Agda:
+   `Godel.CanonicalCodeListLengthStateStepBranches` proves invalid
+   root/nested/code/nat digits enter the failed state using selector-level
+   lemmas, and `Godel.CanonicalCodeListLengthStateFuelFailure` proves failed
+   and done states are fuel-stable while empty-stack/nonzero-rest states fail.
+   The remaining task is to combine the canonical prefix theorem and these
+   failure-side facts into the final all-input scanner evaluator equation.
    `Godel.CanonicalCodeNodeTargets` and `Godel.CanonicalCodeNodeSemantics`
    isolate the outer proof-tree branch parser: `NodeCodeNat input tag
    children-code` means that `input` is a canonical node with the given rule tag
